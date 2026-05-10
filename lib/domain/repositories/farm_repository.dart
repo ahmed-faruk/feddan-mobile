@@ -5,12 +5,14 @@ class CreateFarmParams {
   final double latitude;
   final double longitude;
   final List<String> cropTypes;
+  final DateTime plantingDate;
 
   const CreateFarmParams({
     required this.name,
     required this.latitude,
     required this.longitude,
     required this.cropTypes,
+    required this.plantingDate,
   });
 }
 

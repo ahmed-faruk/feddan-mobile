@@ -27,6 +27,14 @@ final class FarmCropToggled extends FarmEvent {
   List<Object?> get props => [cropType];
 }
 
+final class FarmPlantingDateChanged extends FarmEvent {
+  final DateTime date;
+  const FarmPlantingDateChanged(this.date);
+
+  @override
+  List<Object?> get props => [date];
+}
+
 final class FarmSaveRequested extends FarmEvent {
   const FarmSaveRequested();
 }

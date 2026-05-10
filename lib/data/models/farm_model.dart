@@ -10,34 +10,33 @@ class FarmModel extends FarmEntity {
     required super.latitude,
     required super.longitude,
     required super.cropTypes,
+    required super.plantingDate,
     required super.ownerId,
     required super.createdAt,
   });
 
   factory FarmModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data()! as Map<String, dynamic>;
+    final d = doc.data()! as Map<String, dynamic>;
     return FarmModel(
       id: doc.id,
-      name: data['name'] as String,
-      latitude: (data['latitude'] as num).toDouble(),
-      longitude: (data['longitude'] as num).toDouble(),
-      cropTypes: List<String>.from(data['cropTypes'] as List),
-      ownerId: data['ownerId'] as String,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      name: d['name'] as String,
+      latitude: (d['latitude'] as num).toDouble(),
+      longitude: (d['longitude'] as num).toDouble(),
+      cropTypes: List<String>.from(d['cropTypes'] as List),
+      plantingDate: (d['plantingDate'] as Timestamp).toDate(),
+      ownerId: d['ownerId'] as String,
+      createdAt: (d['createdAt'] as Timestamp).toDate(),
     );
   }
 
-  factory FarmModel.fromParams(
-    String id,
-    CreateFarmParams params,
-    String ownerId,
-  ) =>
+  factory FarmModel.fromParams(String id, CreateFarmParams p, String ownerId) =>
       FarmModel(
         id: id,
-        name: params.name,
-        latitude: params.latitude,
-        longitude: params.longitude,
-        cropTypes: params.cropTypes,
+        name: p.name,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        cropTypes: p.cropTypes,
+        plantingDate: p.plantingDate,
         ownerId: ownerId,
         createdAt: DateTime.now(),
       );
@@ -47,6 +46,7 @@ class FarmModel extends FarmEntity {
         'latitude': latitude,
         'longitude': longitude,
         'cropTypes': cropTypes,
+        'plantingDate': Timestamp.fromDate(plantingDate),
         'ownerId': ownerId,
         'createdAt': Timestamp.fromDate(createdAt),
       };

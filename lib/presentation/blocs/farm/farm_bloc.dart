@@ -17,12 +17,16 @@ class FarmBloc extends Bloc<FarmEvent, FarmState> {
     on<FarmNameChanged>(_onNameChanged);
     on<FarmLocationRequested>(_onLocationRequested);
     on<FarmCropToggled>(_onCropToggled);
+    on<FarmPlantingDateChanged>(_onPlantingDateChanged);
     on<FarmSaveRequested>(_onSaveRequested);
   }
 
-  void _onNameChanged(FarmNameChanged event, Emitter<FarmState> emit) {
-    emit(state.copyWith(name: event.name));
-  }
+  void _onNameChanged(FarmNameChanged event, Emitter<FarmState> emit) =>
+      emit(state.copyWith(name: event.name));
+
+  void _onPlantingDateChanged(
+          FarmPlantingDateChanged event, Emitter<FarmState> emit) =>
+      emit(state.copyWith(plantingDate: event.date));
 
   Future<void> _onLocationRequested(
     FarmLocationRequested event,
@@ -42,16 +46,15 @@ class FarmBloc extends Bloc<FarmEvent, FarmState> {
         ));
         return;
       }
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings:
-            const LocationSettings(accuracy: LocationAccuracy.high),
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
       );
       emit(state.copyWith(
         status: FarmStatus.initial,
-        latitude: position.latitude,
-        longitude: position.longitude,
+        latitude: pos.latitude,
+        longitude: pos.longitude,
       ));
-    } catch (e) {
+    } catch (_) {
       emit(state.copyWith(
         status: FarmStatus.failure,
         errorMessage: 'فشل تحديد الموقع',
@@ -81,6 +84,7 @@ class FarmBloc extends Bloc<FarmEvent, FarmState> {
         latitude: state.latitude!,
         longitude: state.longitude!,
         cropTypes: state.selectedCrops,
+        plantingDate: state.plantingDate!,
       ));
       emit(state.copyWith(status: FarmStatus.success));
     } catch (e) {

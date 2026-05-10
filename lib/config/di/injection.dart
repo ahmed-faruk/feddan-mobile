@@ -4,49 +4,60 @@ import 'package:get_it/get_it.dart';
 
 import '../../data/datasources/remote/auth_remote_datasource.dart';
 import '../../data/datasources/remote/farm_remote_datasource.dart';
+import '../../data/datasources/remote/task_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/farm_repository_impl.dart';
+import '../../data/repositories/task_repository_impl.dart';
+import '../../domain/usecases/complete_task_usecase.dart';
 import '../../domain/usecases/create_farm_usecase.dart';
+import '../../domain/usecases/get_today_tasks_usecase.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/farm/farm_bloc.dart';
 import '../../presentation/blocs/language/language_bloc.dart';
+import '../../presentation/blocs/task/task_bloc.dart';
 
 final getIt = GetIt.instance;
 
 void setupDependencies() {
-  // External services
+  // ── External services ────────────────────────────────────────────────────
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
 
-  // Data sources
+  // ── Data sources ─────────────────────────────────────────────────────────
   getIt.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSource(getIt()),
-  );
+      () => AuthRemoteDataSource(getIt()));
   getIt.registerLazySingleton<FarmRemoteDataSource>(
-    () => FarmRemoteDataSource(getIt()),
-  );
+      () => FarmRemoteDataSource(getIt()));
+  getIt.registerLazySingleton<TaskRemoteDataSource>(
+      () => TaskRemoteDataSource(getIt()));
 
-  // Repositories
+  // ── Repositories ─────────────────────────────────────────────────────────
   getIt.registerLazySingleton<AuthRepositoryImpl>(
-    () => AuthRepositoryImpl(getIt()),
-  );
+      () => AuthRepositoryImpl(getIt()));
   getIt.registerLazySingleton<FarmRepositoryImpl>(
-    () => FarmRepositoryImpl(getIt()),
-  );
+      () => FarmRepositoryImpl(getIt()));
+  getIt.registerLazySingleton<TaskRepositoryImpl>(
+      () => TaskRepositoryImpl(getIt()));
 
-  // Use cases
+  // ── Use cases ─────────────────────────────────────────────────────────────
   getIt.registerLazySingleton<CreateFarmUseCase>(
-    () => CreateFarmUseCase(getIt<FarmRepositoryImpl>()),
-  );
+      () => CreateFarmUseCase(getIt<FarmRepositoryImpl>()));
+  getIt.registerLazySingleton<GetTodayTasksUseCase>(
+      () => GetTodayTasksUseCase(getIt<TaskRepositoryImpl>()));
+  getIt.registerLazySingleton<CompleteTaskUseCase>(
+      () => CompleteTaskUseCase(getIt<TaskRepositoryImpl>()));
 
-  // BLoCs
-  // Singletons: app-level blocs shared across the whole widget tree
+  // ── BLoCs ─────────────────────────────────────────────────────────────────
+  // Singletons: app-level, shared across the widget tree
   getIt.registerLazySingleton<LanguageBloc>(() => LanguageBloc());
   getIt.registerLazySingleton<AuthBloc>(
-    () => AuthBloc(repository: getIt()),
-  );
-  // Factories: per-screen blocs created fresh for each page
-  getIt.registerFactory<FarmBloc>(
-    () => FarmBloc(createFarm: getIt()),
+      () => AuthBloc(repository: getIt()));
+  // Factories: created fresh per screen
+  getIt.registerFactory<FarmBloc>(() => FarmBloc(createFarm: getIt()));
+  getIt.registerFactory<TaskBloc>(
+    () => TaskBloc(
+      getTodayTasks: getIt(),
+      completeTask: getIt(),
+    ),
   );
 }

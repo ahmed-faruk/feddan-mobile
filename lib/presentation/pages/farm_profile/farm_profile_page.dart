@@ -66,6 +66,8 @@ class _FarmProfileView extends StatelessWidget {
               _LocationSection(isArabic: isArabic),
               const SizedBox(height: 24),
               _CropSelectionSection(isArabic: isArabic),
+              const SizedBox(height: 24),
+              _PlantingDateSection(isArabic: isArabic),
               const SizedBox(height: 32),
               _SaveButton(isArabic: isArabic),
               const SizedBox(height: 24),
@@ -310,6 +312,103 @@ class _CropSelectionSection extends StatelessWidget {
                   ),
                 );
               }).toList(),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Planting Date ────────────────────────────────────────────────────────────
+
+class _PlantingDateSection extends StatelessWidget {
+  final bool isArabic;
+  const _PlantingDateSection({required this.isArabic});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          isArabic ? 'تاريخ الزراعة' : 'Planting Date',
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          isArabic ? 'متى زرعت هذا الموسم؟' : 'When did you plant this season?',
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 8),
+        BlocBuilder<FarmBloc, FarmState>(
+          buildWhen: (p, c) => p.plantingDate != c.plantingDate,
+          builder: (context, state) {
+            final date = state.plantingDate;
+            return InkWell(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: date ?? DateTime.now(),
+                  firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                  lastDate: DateTime.now(),
+                  locale: isArabic ? const Locale('ar') : const Locale('en'),
+                );
+                if (picked != null && context.mounted) {
+                  context
+                      .read<FarmBloc>()
+                      .add(FarmPlantingDateChanged(picked));
+                }
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: date != null
+                        ? AppColors.primary.withAlpha(80)
+                        : AppColors.textSecondary.withAlpha(100),
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  color: date != null
+                      ? AppColors.primary.withAlpha(20)
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      color: date != null
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      date != null
+                          ? '${date.day}/${date.month}/${date.year}'
+                          : (isArabic ? 'اختر التاريخ' : 'Select date'),
+                      style: TextStyle(
+                        color: date != null
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                        fontWeight: date != null
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (date != null)
+                      const Icon(Icons.check_circle, color: AppColors.primary),
+                  ],
+                ),
+              ),
             );
           },
         ),

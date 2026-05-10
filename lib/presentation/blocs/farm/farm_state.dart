@@ -8,6 +8,7 @@ final class FarmState extends Equatable {
   final double? latitude;
   final double? longitude;
   final List<String> selectedCrops;
+  final DateTime? plantingDate;
   final String? errorMessage;
 
   const FarmState({
@@ -16,12 +17,16 @@ final class FarmState extends Equatable {
     this.latitude,
     this.longitude,
     this.selectedCrops = const [],
+    this.plantingDate,
     this.errorMessage,
   });
 
   bool get hasLocation => latitude != null && longitude != null;
   bool get isValid =>
-      name.trim().isNotEmpty && hasLocation && selectedCrops.isNotEmpty;
+      name.trim().isNotEmpty &&
+      hasLocation &&
+      selectedCrops.isNotEmpty &&
+      plantingDate != null;
 
   FarmState copyWith({
     FarmStatus? status,
@@ -29,6 +34,7 @@ final class FarmState extends Equatable {
     double? latitude,
     double? longitude,
     List<String>? selectedCrops,
+    DateTime? plantingDate,
     String? errorMessage,
   }) =>
       FarmState(
@@ -37,10 +43,11 @@ final class FarmState extends Equatable {
         latitude: latitude ?? this.latitude,
         longitude: longitude ?? this.longitude,
         selectedCrops: selectedCrops ?? this.selectedCrops,
+        plantingDate: plantingDate ?? this.plantingDate,
         errorMessage: errorMessage ?? this.errorMessage,
       );
 
   @override
   List<Object?> get props =>
-      [status, name, latitude, longitude, selectedCrops, errorMessage];
+      [status, name, latitude, longitude, selectedCrops, plantingDate, errorMessage];
 }

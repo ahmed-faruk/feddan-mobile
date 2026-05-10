@@ -2,15 +2,15 @@ import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/repositories/auth_repository_impl.dart';
+import '../../../domain/repositories/auth_repository.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepositoryImpl _repository;
+  final AuthRepository _repository;
 
-  AuthBloc({required AuthRepositoryImpl repository})
+  AuthBloc({required AuthRepository repository})
       : _repository = repository,
         super(
           AuthState(

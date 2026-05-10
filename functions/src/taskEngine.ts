@@ -151,12 +151,17 @@ export async function runDailyTaskEngine(
       // Send FCM digest for high-priority tasks
       const highTasks = farmTasks.filter((t) => t.priority === "HIGH");
       if (highTasks.length > 0) {
-        await sendDailyDigest(
-          db,
-          farm.ownerId,
-          farm.name ?? "مزرعتك",
-          highTasks.map((t) => ({ messageAr: t.messageAr, messageEn: t.messageEn, type: t.type })),
-        );
+        try {
+          await sendDailyDigest(
+            db,
+            farm.ownerId,
+            farm.name ?? "مزرعتك",
+            highTasks.map((t) => ({ messageAr: t.messageAr, messageEn: t.messageEn, type: t.type })),
+          );
+        } catch (err) {
+          // FCM failure must not fail the whole function — tasks are already written
+          console.error(`[FCM] Digest failed for farm ${farmDoc.id}:`, err);
+        }
       }
     }
   }

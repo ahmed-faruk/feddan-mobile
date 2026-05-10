@@ -8,6 +8,7 @@ import '../../data/datasources/remote/task_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/farm_repository_impl.dart';
 import '../../data/repositories/task_repository_impl.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/complete_task_usecase.dart';
 import '../../domain/usecases/create_farm_usecase.dart';
 import '../../domain/usecases/get_farms_usecase.dart';
@@ -34,8 +35,8 @@ void setupDependencies() {
   getIt.registerLazySingleton<TaskRemoteDataSource>(
       () => TaskRemoteDataSource(getIt()));
 
-  // ── Repositories ─────────────────────────────────────────────────────────
-  getIt.registerLazySingleton<AuthRepositoryImpl>(
+  // ── Repositories — registered under their abstract interface ─────────────
+  getIt.registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(getIt()));
   getIt.registerLazySingleton<FarmRepositoryImpl>(
       () => FarmRepositoryImpl(getIt()));
@@ -53,11 +54,14 @@ void setupDependencies() {
       () => CompleteTaskUseCase(getIt<TaskRepositoryImpl>()));
 
   // ── BLoCs ─────────────────────────────────────────────────────────────────
+  // Singletons: app-level, shared across the widget tree
   getIt.registerLazySingleton<LanguageBloc>(() => LanguageBloc());
-  getIt.registerLazySingleton<AuthBloc>(() => AuthBloc(repository: getIt()));
+  getIt.registerLazySingleton<AuthBloc>(
+      () => AuthBloc(repository: getIt<AuthRepository>()));
 
+  // Factories: created fresh per screen instance
   getIt.registerFactory<FarmListCubit>(
-    () => FarmListCubit(getFarms: getIt(), auth: getIt()),
+    () => FarmListCubit(getFarms: getIt(), auth: getIt<AuthRepository>()),
   );
   getIt.registerFactory<FarmBloc>(() => FarmBloc(createFarm: getIt()));
   getIt.registerFactory<TaskBloc>(

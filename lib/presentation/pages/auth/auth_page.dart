@@ -417,6 +417,10 @@ class _ResendTimerState extends State<_ResendTimer> {
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) {
+        _timer.cancel();
+        return;
+      }
       if (_seconds > 0) {
         setState(() => _seconds--);
       } else {

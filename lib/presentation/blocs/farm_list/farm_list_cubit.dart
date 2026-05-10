@@ -1,16 +1,16 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/repositories/auth_repository_impl.dart';
+import '../../../domain/repositories/auth_repository.dart';
 import '../../../domain/usecases/get_farms_usecase.dart';
 import 'farm_list_state.dart';
 
 class FarmListCubit extends Cubit<FarmListState> {
   final GetFarmsUseCase _getFarms;
-  final AuthRepositoryImpl _auth;
+  final AuthRepository _auth;
 
   FarmListCubit({
     required GetFarmsUseCase getFarms,
-    required AuthRepositoryImpl auth,
+    required AuthRepository auth,
   })  : _getFarms = getFarms,
         _auth = auth,
         super(const FarmListState());

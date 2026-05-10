@@ -10,9 +10,11 @@ import '../../data/repositories/farm_repository_impl.dart';
 import '../../data/repositories/task_repository_impl.dart';
 import '../../domain/usecases/complete_task_usecase.dart';
 import '../../domain/usecases/create_farm_usecase.dart';
+import '../../domain/usecases/get_farms_usecase.dart';
 import '../../domain/usecases/get_today_tasks_usecase.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/farm/farm_bloc.dart';
+import '../../presentation/blocs/farm_list/farm_list_cubit.dart';
 import '../../presentation/blocs/language/language_bloc.dart';
 import '../../presentation/blocs/task/task_bloc.dart';
 
@@ -21,7 +23,8 @@ final getIt = GetIt.instance;
 void setupDependencies() {
   // ── External services ────────────────────────────────────────────────────
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
-  getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
+  getIt.registerLazySingleton<FirebaseFirestore>(
+      () => FirebaseFirestore.instance);
 
   // ── Data sources ─────────────────────────────────────────────────────────
   getIt.registerLazySingleton<AuthRemoteDataSource>(
@@ -42,6 +45,8 @@ void setupDependencies() {
   // ── Use cases ─────────────────────────────────────────────────────────────
   getIt.registerLazySingleton<CreateFarmUseCase>(
       () => CreateFarmUseCase(getIt<FarmRepositoryImpl>()));
+  getIt.registerLazySingleton<GetFarmsUseCase>(
+      () => GetFarmsUseCase(getIt<FarmRepositoryImpl>()));
   getIt.registerLazySingleton<GetTodayTasksUseCase>(
       () => GetTodayTasksUseCase(getIt<TaskRepositoryImpl>()));
   getIt.registerLazySingleton<CompleteTaskUseCase>(
@@ -50,14 +55,13 @@ void setupDependencies() {
   // ── BLoCs ─────────────────────────────────────────────────────────────────
   // Singletons: app-level, shared across the widget tree
   getIt.registerLazySingleton<LanguageBloc>(() => LanguageBloc());
-  getIt.registerLazySingleton<AuthBloc>(
-      () => AuthBloc(repository: getIt()));
-  // Factories: created fresh per screen
+  getIt.registerLazySingleton<AuthBloc>(() => AuthBloc(repository: getIt()));
+
+  // Factories: created fresh per screen instance
+  getIt.registerFactory<FarmListCubit>(
+      () => FarmListCubit(getFarms: getIt()));
   getIt.registerFactory<FarmBloc>(() => FarmBloc(createFarm: getIt()));
   getIt.registerFactory<TaskBloc>(
-    () => TaskBloc(
-      getTodayTasks: getIt(),
-      completeTask: getIt(),
-    ),
+    () => TaskBloc(getTodayTasks: getIt(), completeTask: getIt()),
   );
 }

@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +6,7 @@ import '../../../config/di/injection.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../domain/entities/farm_entity.dart';
 import '../../../domain/entities/task_entity.dart';
+import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/farm_list/farm_list_cubit.dart';
 import '../../blocs/farm_list/farm_list_state.dart';
 import '../../blocs/language/language_bloc.dart';
@@ -17,11 +17,10 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => getIt<FarmListCubit>()..loadFarms(uid),
+          create: (_) => getIt<FarmListCubit>()..loadFarms(),
         ),
         BlocProvider(create: (_) => getIt<TaskBloc>()),
       ],
@@ -38,14 +37,36 @@ class _HomeView extends StatelessWidget {
     final isArabic =
         context.watch<LanguageBloc>().state.locale.languageCode == 'ar';
 
-    return BlocListener<FarmListCubit, FarmListState>(
-      listenWhen: (prev, curr) =>
-          prev.status != curr.status &&
-          curr.status == FarmListStatus.loaded,
-      listener: (context, state) {
-        // Trigger task load with the real farm IDs once farms are fetched
-        context.read<TaskBloc>().add(TasksLoadRequested(state.farmIds));
-      },
+    return MultiBlocListener(
+      listeners: [
+        // Load tasks when farms finish loading
+        BlocListener<FarmListCubit, FarmListState>(
+          listenWhen: (p, c) =>
+              p.status != c.status && c.status == FarmListStatus.loaded,
+          listener: (context, state) {
+            context.read<TaskBloc>().add(TasksLoadRequested(state.farmIds));
+          },
+        ),
+        // Show snackbar on task action errors (complete/skip failure)
+        BlocListener<TaskBloc, TaskState>(
+          listenWhen: (p, c) =>
+              c.actionError != null && p.actionError != c.actionError,
+          listener: (context, state) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.actionError!),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          },
+        ),
+        // Redirect to auth when user signs out
+        BlocListener<AuthBloc, AuthState>(
+          listenWhen: (p, c) =>
+              p.status != c.status && c.status == AuthStatus.initial,
+          listener: (context, _) => context.go('/auth'),
+        ),
+      ],
       child: Scaffold(
         appBar: AppBar(
           title: Text(isArabic ? 'فدان' : 'Feddan'),
@@ -65,23 +86,26 @@ class _HomeView extends StatelessWidget {
                 ),
               ),
             ),
+            IconButton(
+              icon: const Icon(Icons.logout, color: Colors.white),
+              tooltip: isArabic ? 'تسجيل الخروج' : 'Sign out',
+              onPressed: () =>
+                  context.read<AuthBloc>().add(const AuthSignOutRequested()),
+            ),
           ],
         ),
         body: RefreshIndicator(
           onRefresh: () async {
-            final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
-            await context.read<FarmListCubit>().refresh(uid);
+            await context.read<FarmListCubit>().refresh();
           },
           child: BlocBuilder<FarmListCubit, FarmListState>(
             builder: (context, farmState) {
-              // Full-screen loading on first fetch
               if (farmState.status == FarmListStatus.initial ||
                   (farmState.status == FarmListStatus.loading &&
                       !farmState.hasFarms)) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              // No farms yet
               if (farmState.status == FarmListStatus.loaded &&
                   !farmState.hasFarms) {
                 return ListView(
@@ -90,17 +114,15 @@ class _HomeView extends StatelessWidget {
                 );
               }
 
-              // Farms exist — show full dashboard
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _FarmSection(
-                      farms: farmState.farms, isArabic: isArabic),
+                  _FarmSection(farms: farmState.farms, isArabic: isArabic),
                   const SizedBox(height: 24),
                   _TodayHeader(isArabic: isArabic),
                   const SizedBox(height: 12),
                   _TaskList(isArabic: isArabic),
-                  const SizedBox(height: 80), // FAB clearance
+                  const SizedBox(height: 80),
                 ],
               );
             },
@@ -204,11 +226,12 @@ class _FarmSection extends StatelessWidget {
               ActionChip(
                 avatar: const Icon(Icons.add,
                     size: 16, color: AppColors.primary),
-                label: Text(isArabic ? 'إضافة' : 'Add',
-                    style: const TextStyle(color: AppColors.primary)),
+                label: Text(
+                  isArabic ? 'إضافة' : 'Add',
+                  style: const TextStyle(color: AppColors.primary),
+                ),
                 backgroundColor: AppColors.primary.withAlpha(20),
-                side: const BorderSide(
-                    color: AppColors.primary, width: 0.5),
+                side: const BorderSide(color: AppColors.primary, width: 0.5),
                 onPressed: () => context.push('/farm-profile'),
               ),
             ],
@@ -232,10 +255,8 @@ class _FarmChip extends StatelessWidget {
           backgroundColor: AppColors.primary,
           child: Icon(Icons.agriculture, size: 14, color: Colors.white),
         ),
-        label: Text(
-          farm.name,
-          style: const TextStyle(fontWeight: FontWeight.w500),
-        ),
+        label: Text(farm.name,
+            style: const TextStyle(fontWeight: FontWeight.w500)),
         backgroundColor: AppColors.surface,
         side: const BorderSide(color: AppColors.primary, width: 0.5),
         padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -244,7 +265,7 @@ class _FarmChip extends StatelessWidget {
   }
 }
 
-// ─── Today's Header ───────────────────────────────────────────────────────────
+// ─── Today Header ─────────────────────────────────────────────────────────────
 
 class _TodayHeader extends StatelessWidget {
   final bool isArabic;
@@ -293,8 +314,7 @@ class _TaskList extends StatelessWidget {
               child: Center(child: CircularProgressIndicator()),
             );
           case TaskLoadStatus.failure:
-            return _TaskError(
-                message: state.errorMessage, isArabic: isArabic);
+            return _TaskError(isArabic: isArabic);
           case TaskLoadStatus.loaded:
             if (state.tasks.isEmpty) {
               return _NoTasksCard(isArabic: isArabic);
@@ -347,9 +367,8 @@ class _NoTasksCard extends StatelessWidget {
 }
 
 class _TaskError extends StatelessWidget {
-  final String? message;
   final bool isArabic;
-  const _TaskError({this.message, required this.isArabic});
+  const _TaskError({required this.isArabic});
 
   @override
   Widget build(BuildContext context) {
@@ -411,7 +430,6 @@ class _TaskCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Priority icon
             Container(
               width: 46,
               height: 46,
@@ -422,30 +440,25 @@ class _TaskCard extends StatelessWidget {
               child: Icon(_typeIcon, color: _priorityColor, size: 22),
             ),
             const SizedBox(width: 12),
-            // Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: _priorityColor.withAlpha(25),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          _priorityLabel,
-                          style: TextStyle(
-                            color: _priorityColor,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: _priorityColor.withAlpha(25),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      _priorityLabel,
+                      style: TextStyle(
+                        color: _priorityColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -478,7 +491,6 @@ class _TaskCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Actions
             if (!isDone && task.isActionable)
               Column(
                 children: [

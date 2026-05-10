@@ -20,6 +20,7 @@ interface FarmDoc {
 interface TaskDoc {
   farmId: string;
   cropType: string;
+  ownerId: string; // denormalised for Firestore rules — avoids get() cost per task read
   type: TaskType;
   priority: Priority;
   scheduledDate: admin.firestore.Timestamp;
@@ -79,7 +80,7 @@ export async function runDailyTaskEngine(
       // ── Irrigation ────────────────────────────────────────────────────────
       if (weather.rainfall >= RAIN_SKIP_THRESHOLD_MM) {
         farmTasks.push({
-          farmId: farmDoc.id, cropType, type: "IRRIGATE_SKIP",
+          farmId: farmDoc.id, cropType, ownerId: farm.ownerId, type: "IRRIGATE_SKIP",
           priority: "LOW", scheduledDate: scheduledTs,
           messageAr: `ري ${cropAr} غير مطلوب — متوقع هطول ${weather.rainfall.toFixed(0)} مم`,
           messageEn: `${cropType} irrigation skipped — ${weather.rainfall.toFixed(0)}mm rain expected`,
@@ -87,7 +88,7 @@ export async function runDailyTaskEngine(
         });
       } else if (etc >= IRRIGATE_THRESHOLD_MM) {
         farmTasks.push({
-          farmId: farmDoc.id, cropType, type: "IRRIGATE",
+          farmId: farmDoc.id, cropType, ownerId: farm.ownerId, type: "IRRIGATE",
           priority: etc >= 6.0 ? "HIGH" : "NORMAL",
           scheduledDate: scheduledTs,
           messageAr: `ري ${cropAr} اليوم — الطلب المائي ${etc.toFixed(1)} مم`,
@@ -99,7 +100,7 @@ export async function runDailyTaskEngine(
       // ── Disease / Inspection ──────────────────────────────────────────────
       if (weather.humidityPct > 80 && weather.maxTempC > 15 && weather.maxTempC < 30) {
         farmTasks.push({
-          farmId: farmDoc.id, cropType, type: "INSPECT",
+          farmId: farmDoc.id, cropType, ownerId: farm.ownerId, type: "INSPECT",
           priority: "NORMAL", scheduledDate: scheduledTs,
           messageAr: `تفقد ${cropAr} — رطوبة ${weather.humidityPct.toFixed(0)}٪، خطر فطري`,
           messageEn: `Inspect ${cropType} — ${weather.humidityPct.toFixed(0)}% humidity, fungal risk`,
@@ -111,7 +112,7 @@ export async function runDailyTaskEngine(
       const fertType = isFertilizationDay(cropType, daysSincePlanting);
       if (fertType === "base") {
         farmTasks.push({
-          farmId: farmDoc.id, cropType, type: "FERTILIZE",
+          farmId: farmDoc.id, cropType, ownerId: farm.ownerId, type: "FERTILIZE",
           priority: "NORMAL", scheduledDate: scheduledTs,
           messageAr: `ضع السماد الأساسي لـ${cropAr} عند الزراعة`,
           messageEn: `Apply base fertilizer for ${cropType} at planting`,
@@ -119,7 +120,7 @@ export async function runDailyTaskEngine(
         });
       } else if (fertType === "nitrogen") {
         farmTasks.push({
-          farmId: farmDoc.id, cropType, type: "FERTILIZE",
+          farmId: farmDoc.id, cropType, ownerId: farm.ownerId, type: "FERTILIZE",
           priority: "NORMAL", scheduledDate: scheduledTs,
           messageAr: `سماد نيتروجيني لـ${cropAr} — بداية مرحلة النمو`,
           messageEn: `Nitrogen fertilizer for ${cropType} — growth stage started`,
@@ -127,7 +128,7 @@ export async function runDailyTaskEngine(
         });
       } else if (fertType === "potassium") {
         farmTasks.push({
-          farmId: farmDoc.id, cropType, type: "FERTILIZE",
+          farmId: farmDoc.id, cropType, ownerId: farm.ownerId, type: "FERTILIZE",
           priority: "HIGH", scheduledDate: scheduledTs,
           messageAr: `سماد بوتاسيوم وفوسفور لـ${cropAr} — مرحلة التزهير`,
           messageEn: `K+P fertilizer for ${cropType} — flowering stage`,

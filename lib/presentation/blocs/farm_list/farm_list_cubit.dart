@@ -1,19 +1,32 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../data/repositories/auth_repository_impl.dart';
 import '../../../domain/usecases/get_farms_usecase.dart';
 import 'farm_list_state.dart';
 
 class FarmListCubit extends Cubit<FarmListState> {
   final GetFarmsUseCase _getFarms;
+  final AuthRepositoryImpl _auth;
 
-  FarmListCubit({required GetFarmsUseCase getFarms})
-      : _getFarms = getFarms,
+  FarmListCubit({
+    required GetFarmsUseCase getFarms,
+    required AuthRepositoryImpl auth,
+  })  : _getFarms = getFarms,
+        _auth = auth,
         super(const FarmListState());
 
-  Future<void> loadFarms(String ownerId) async {
+  Future<void> loadFarms() async {
+    final uid = _auth.currentUserId;
+    if (uid == null) {
+      emit(state.copyWith(
+        status: FarmListStatus.failure,
+        errorMessage: 'Not authenticated',
+      ));
+      return;
+    }
     emit(state.copyWith(status: FarmListStatus.loading));
     try {
-      final farms = await _getFarms(ownerId);
+      final farms = await _getFarms(uid);
       emit(state.copyWith(status: FarmListStatus.loaded, farms: farms));
     } catch (e) {
       emit(state.copyWith(
@@ -23,5 +36,5 @@ class FarmListCubit extends Cubit<FarmListState> {
     }
   }
 
-  Future<void> refresh(String ownerId) => loadFarms(ownerId);
+  Future<void> refresh() => loadFarms();
 }

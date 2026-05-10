@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../core/errors/failures.dart';
 import '../../../domain/repositories/farm_repository.dart';
 import '../../models/farm_model.dart';
 
@@ -10,9 +11,11 @@ class FarmRemoteDataSource {
   const FarmRemoteDataSource(this._firestore);
 
   Future<FarmModel> createFarm(CreateFarmParams params) async {
-    final ownerId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw const AuthFailure('User not authenticated');
+
     final ref = _firestore.collection('farms').doc();
-    final model = FarmModel.fromParams(ref.id, params, ownerId);
+    final model = FarmModel.fromParams(ref.id, params, uid);
     await ref.set(model.toJson());
     return model;
   }
@@ -22,6 +25,7 @@ class FarmRemoteDataSource {
         .collection('farms')
         .where('ownerId', isEqualTo: ownerId)
         .orderBy('createdAt', descending: true)
+        .limit(50)
         .get();
     return snapshot.docs.map(FarmModel.fromFirestore).toList();
   }

@@ -53,13 +53,12 @@ void setupDependencies() {
       () => CompleteTaskUseCase(getIt<TaskRepositoryImpl>()));
 
   // ── BLoCs ─────────────────────────────────────────────────────────────────
-  // Singletons: app-level, shared across the widget tree
   getIt.registerLazySingleton<LanguageBloc>(() => LanguageBloc());
   getIt.registerLazySingleton<AuthBloc>(() => AuthBloc(repository: getIt()));
 
-  // Factories: created fresh per screen instance
   getIt.registerFactory<FarmListCubit>(
-      () => FarmListCubit(getFarms: getIt()));
+    () => FarmListCubit(getFarms: getIt(), auth: getIt()),
+  );
   getIt.registerFactory<FarmBloc>(() => FarmBloc(createFarm: getIt()));
   getIt.registerFactory<TaskBloc>(
     () => TaskBloc(getTodayTasks: getIt(), completeTask: getIt()),

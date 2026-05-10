@@ -1,2 +1,7 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
 #include "Generated.xcconfig"
+
+// Disable code signing for simulator debug builds — prevents keychain hang
+CODE_SIGNING_REQUIRED = NO
+CODE_SIGNING_ALLOWED = NO
+CODE_SIGN_IDENTITY =

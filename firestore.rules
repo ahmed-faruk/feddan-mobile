@@ -2,26 +2,27 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users: can only read/write their own profile (FCM token storage)
+    // Users: own profile only (FCM token storage)
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Farms: authenticated users can create; only owner can read/update/delete
+    // Farms: creator must set themselves as owner; only owner can read/modify
     match /farms/{farmId} {
-      allow create: if request.auth != null;
+      allow create: if request.auth != null
+          && request.resource.data.ownerId == request.auth.uid;
       allow read, update, delete: if request.auth != null
-          && request.auth.uid == resource.data.ownerId;
+          && resource.data.ownerId == request.auth.uid;
 
-      // Tasks: owner can read and flip status only; Cloud Functions write via Admin SDK
+      // Tasks: ownerId is denormalised onto each task document by Cloud Functions.
+      // No get() calls → no extra billed reads.
       match /tasks/{taskId} {
         allow read: if request.auth != null
-            && request.auth.uid ==
-               get(/databases/$(database)/documents/farms/$(farmId)).data.ownerId;
+            && resource.data.ownerId == request.auth.uid;
         allow update: if request.auth != null
-            && request.auth.uid ==
-               get(/databases/$(database)/documents/farms/$(farmId)).data.ownerId
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+            && resource.data.ownerId == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status']);
         allow create, delete: if false; // Cloud Functions (Admin SDK) only
       }
     }

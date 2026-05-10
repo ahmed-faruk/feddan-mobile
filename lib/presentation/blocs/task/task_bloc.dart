@@ -43,23 +43,34 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     TaskCompleted event,
     Emitter<TaskState> emit,
   ) async {
-    await _completeTask(farmId: event.farmId, taskId: event.taskId);
-    final updated = state.tasks.map((t) {
-      return t.id == event.taskId ? _withStatus(t, TaskStatus.done) : t;
-    }).toList();
-    emit(state.copyWith(tasks: updated));
+    emit(state.copyWith(clearActionError: true));
+    try {
+      await _completeTask(farmId: event.farmId, taskId: event.taskId);
+      final updated = state.tasks
+          .map((t) => t.id == event.taskId ? _withStatus(t, TaskStatus.done) : t)
+          .toList();
+      emit(state.copyWith(tasks: updated));
+    } catch (_) {
+      emit(state.copyWith(actionError: 'فشل تحديث المهمة — تحقق من الاتصال'));
+    }
   }
 
   Future<void> _onSkipped(
     TaskSkipped event,
     Emitter<TaskState> emit,
   ) async {
-    await _completeTask(
-        farmId: event.farmId, taskId: event.taskId, skip: true);
-    final updated = state.tasks.map((t) {
-      return t.id == event.taskId ? _withStatus(t, TaskStatus.skipped) : t;
-    }).toList();
-    emit(state.copyWith(tasks: updated));
+    emit(state.copyWith(clearActionError: true));
+    try {
+      await _completeTask(
+          farmId: event.farmId, taskId: event.taskId, skip: true);
+      final updated = state.tasks
+          .map((t) =>
+              t.id == event.taskId ? _withStatus(t, TaskStatus.skipped) : t)
+          .toList();
+      emit(state.copyWith(tasks: updated));
+    } catch (_) {
+      emit(state.copyWith(actionError: 'فشل تحديث المهمة — تحقق من الاتصال'));
+    }
   }
 
   TaskEntity _withStatus(TaskEntity task, TaskStatus status) => TaskEntity(

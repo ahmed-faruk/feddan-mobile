@@ -6,21 +6,29 @@ class GetTodayTasksUseCase {
   const GetTodayTasksUseCase(this._repository);
 
   Future<List<TaskEntity>> call(List<String> farmIds) async {
+    if (farmIds.isEmpty) return [];
+
     final today = DateTime.now();
     final date = DateTime(today.year, today.month, today.day);
 
+    // Isolate per-farm failures — one bad query doesn't wipe the whole list.
     final results = await Future.wait(
-      farmIds.map((id) => _repository.getTasksForDate(farmId: id, date: date)),
+      farmIds.map((id) async {
+        try {
+          return await _repository.getTasksForDate(farmId: id, date: date);
+        } catch (_) {
+          return <TaskEntity>[];
+        }
+      }),
     );
 
-    final all = results.expand((list) => list).toList()
+    return results
+        .expand((list) => list)
+        .toList()
       ..sort((a, b) {
-        // HIGH first, then by type (IRRIGATE before others)
         final pCmp = a.priority.index.compareTo(b.priority.index);
         if (pCmp != 0) return pCmp;
         return a.type.index.compareTo(b.type.index);
       });
-
-    return all;
   }
 }

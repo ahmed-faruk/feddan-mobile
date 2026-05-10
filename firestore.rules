@@ -2,18 +2,25 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Users: can only read/write their own profile (FCM token storage)
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
     // Farms: authenticated users can create; only owner can read/update/delete
     match /farms/{farmId} {
       allow create: if request.auth != null;
       allow read, update, delete: if request.auth != null
           && request.auth.uid == resource.data.ownerId;
 
-      // Tasks: owner can read and update status only; Cloud Functions write via Admin SDK
+      // Tasks: owner can read and flip status only; Cloud Functions write via Admin SDK
       match /tasks/{taskId} {
         allow read: if request.auth != null
-            && request.auth.uid == get(/databases/$(database)/documents/farms/$(farmId)).data.ownerId;
+            && request.auth.uid ==
+               get(/databases/$(database)/documents/farms/$(farmId)).data.ownerId;
         allow update: if request.auth != null
-            && request.auth.uid == get(/databases/$(database)/documents/farms/$(farmId)).data.ownerId
+            && request.auth.uid ==
+               get(/databases/$(database)/documents/farms/$(farmId)).data.ownerId
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
         allow create, delete: if false; // Cloud Functions (Admin SDK) only
       }

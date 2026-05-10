@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/language/language_bloc.dart';
@@ -17,6 +18,8 @@ class AuthPage extends StatelessWidget {
       listenWhen: (p, c) => p.status != c.status,
       listener: (context, state) {
         if (state.status == AuthStatus.authenticated) {
+          // Request FCM permission and save token after the user signs in.
+          NotificationService.requestPermission();
           context.go('/home');
         } else if (state.status == AuthStatus.failure &&
             state.errorMessage != null) {

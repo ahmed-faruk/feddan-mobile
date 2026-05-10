@@ -43,6 +43,9 @@ dependencies:
   # Location
   geolocator: ^13.0.0
 
+  # Notifications
+  flutter_local_notifications: ^17.0.0
+
   # Code generation annotations (builders added per feature)
   json_annotation: ^4.9.0
 

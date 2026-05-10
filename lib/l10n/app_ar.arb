@@ -1,0 +1,111 @@
+{
+  "@@locale": "ar",
+
+  "appName": "فدان",
+  "@appName": { "description": "Application name" },
+
+  "splashLoading": "جارٍ التحميل...",
+  "@splashLoading": { "description": "Loading text on splash screen" },
+
+  "homeTitle": "مزرعتي",
+  "@homeTitle": { "description": "Home page title" },
+
+  "welcome": "مرحباً بك في فدان",
+  "@welcome": { "description": "Welcome message" },
+
+  "myFarms": "مزارعي",
+  "@myFarms": { "description": "My farms section label" },
+
+  "addFarm": "إضافة مزرعة",
+  "@addFarm": { "description": "Add farm button" },
+
+  "todayTasks": "مهام اليوم",
+  "@todayTasks": { "description": "Today's tasks section" },
+
+  "noTasksToday": "لا توجد مهام اليوم",
+  "@noTasksToday": { "description": "Empty tasks message" },
+
+  "irrigate": "ري",
+  "@irrigate": { "description": "Irrigation task type" },
+
+  "fertilize": "تسميد",
+  "@fertilize": { "description": "Fertilization task type" },
+
+  "spray": "رش",
+  "@spray": { "description": "Spraying task type" },
+
+  "cropTomato": "طماطم",
+  "@cropTomato": { "description": "Tomato crop name" },
+
+  "cropPotato": "بطاطس",
+  "@cropPotato": { "description": "Potato crop name" },
+
+  "cropEggplant": "باذنجان",
+  "@cropEggplant": { "description": "Eggplant crop name" },
+
+  "cropPepper": "فلفل",
+  "@cropPepper": { "description": "Pepper crop name" },
+
+  "cropWatermelon": "بطيخ",
+  "@cropWatermelon": { "description": "Watermelon crop name" },
+
+  "cropCantaloupe": "شمام",
+  "@cropCantaloupe": { "description": "Cantaloupe crop name" },
+
+  "cropHoneydew": "كنتالوب",
+  "@cropHoneydew": { "description": "Honeydew crop name" },
+
+  "cropCucumber": "خيار",
+  "@cropCucumber": { "description": "Cucumber crop name" },
+
+  "cropSquash": "كوسة",
+  "@cropSquash": { "description": "Squash crop name" },
+
+  "cropZucchini": "قرع",
+  "@cropZucchini": { "description": "Zucchini crop name" },
+
+  "weatherToday": "الطقس اليوم",
+  "@weatherToday": { "description": "Today's weather label" },
+
+  "temperature": "درجة الحرارة",
+  "@temperature": { "description": "Temperature label" },
+
+  "humidity": "الرطوبة",
+  "@humidity": { "description": "Humidity label" },
+
+  "windSpeed": "سرعة الرياح",
+  "@windSpeed": { "description": "Wind speed label" },
+
+  "rainExpected": "متوقع هطول أمطار",
+  "@rainExpected": { "description": "Rain expected alert" },
+
+  "settings": "الإعدادات",
+  "@settings": { "description": "Settings page title" },
+
+  "language": "اللغة",
+  "@language": { "description": "Language setting label" },
+
+  "arabic": "العربية",
+  "@arabic": { "description": "Arabic language name" },
+
+  "english": "الإنجليزية",
+  "@english": { "description": "English language name" },
+
+  "save": "حفظ",
+  "@save": { "description": "Save button" },
+
+  "cancel": "إلغاء",
+  "@cancel": { "description": "Cancel button" },
+
+  "confirm": "تأكيد",
+  "@confirm": { "description": "Confirm button" },
+
+  "errorGeneric": "حدث خطأ، يرجى المحاولة مرة أخرى",
+  "@errorGeneric": { "description": "Generic error message" },
+
+  "errorNoInternet": "لا يوجد اتصال بالإنترنت",
+  "@errorNoInternet": { "description": "No internet error message" },
+
+  "retry": "إعادة المحاولة",
+  "@retry": { "description": "Retry button" }
+}

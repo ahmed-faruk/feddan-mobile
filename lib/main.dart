@@ -6,6 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'app.dart';
 import 'config/di/injection.dart';
 import 'firebase_options.dart';
+import 'presentation/blocs/auth/auth_bloc.dart';
 import 'presentation/blocs/language/language_bloc.dart';
 
 void main() async {
@@ -21,8 +22,11 @@ void main() async {
   setupDependencies();
 
   runApp(
-    BlocProvider(
-      create: (_) => getIt<LanguageBloc>(),
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<LanguageBloc>()),
+        BlocProvider(create: (_) => getIt<AuthBloc>()),
+      ],
       child: const FeddanApp(),
     ),
   );

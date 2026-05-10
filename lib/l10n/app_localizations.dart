@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'مرحباً بك في فدان'**
   String get welcome;
 
+  /// Empty state prompt on home screen
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف مزرعتك الأولى للبدء'**
+  String get addFirstFarm;
+
   /// My farms section label
   ///
   /// In ar, this message translates to:
@@ -133,6 +139,84 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'إضافة مزرعة'**
   String get addFarm;
+
+  /// Farm profile page title
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة مزرعة'**
+  String get farmProfileTitle;
+
+  /// Farm name field label
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم المزرعة'**
+  String get farmNameLabel;
+
+  /// Farm name field hint
+  ///
+  /// In ar, this message translates to:
+  /// **'مثال: مزرعة الفيوم'**
+  String get farmNameHint;
+
+  /// Location section title
+  ///
+  /// In ar, this message translates to:
+  /// **'موقع المزرعة'**
+  String get farmLocationTitle;
+
+  /// Use GPS location button
+  ///
+  /// In ar, this message translates to:
+  /// **'استخدام موقعي الحالي'**
+  String get useCurrentLocation;
+
+  /// Locating status text
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ تحديد الموقع...'**
+  String get locating;
+
+  /// Location confirmed label
+  ///
+  /// In ar, this message translates to:
+  /// **'الموقع المحدد'**
+  String get locationSet;
+
+  /// Update location button
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة تحديد الموقع'**
+  String get updateLocation;
+
+  /// Crops section title
+  ///
+  /// In ar, this message translates to:
+  /// **'المحاصيل'**
+  String get cropsTitle;
+
+  /// Crops section subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر محاصيل مزرعتك'**
+  String get cropsSubtitle;
+
+  /// Save farm button
+  ///
+  /// In ar, this message translates to:
+  /// **'حفظ المزرعة'**
+  String get saveFarm;
+
+  /// Farm saved success message
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حفظ المزرعة بنجاح'**
+  String get farmSavedSuccess;
+
+  /// Location permission denied error
+  ///
+  /// In ar, this message translates to:
+  /// **'تم رفض إذن الموقع — يرجى السماح من الإعدادات'**
+  String get locationPermissionDenied;
 
   /// Today's tasks section
   ///
@@ -164,137 +248,143 @@ abstract class AppLocalizations {
   /// **'رش'**
   String get spray;
 
-  /// Tomato crop name
+  /// No description provided for @cropTomato.
   ///
   /// In ar, this message translates to:
   /// **'طماطم'**
   String get cropTomato;
 
-  /// Potato crop name
+  /// No description provided for @cropPotato.
   ///
   /// In ar, this message translates to:
   /// **'بطاطس'**
   String get cropPotato;
 
-  /// Eggplant crop name
+  /// No description provided for @cropEggplant.
   ///
   /// In ar, this message translates to:
   /// **'باذنجان'**
   String get cropEggplant;
 
-  /// Pepper crop name
+  /// No description provided for @cropPepper.
   ///
   /// In ar, this message translates to:
   /// **'فلفل'**
   String get cropPepper;
 
-  /// Watermelon crop name
+  /// No description provided for @cropWatermelon.
   ///
   /// In ar, this message translates to:
   /// **'بطيخ'**
   String get cropWatermelon;
 
-  /// Cantaloupe crop name
+  /// No description provided for @cropCantaloupe.
   ///
   /// In ar, this message translates to:
   /// **'شمام'**
   String get cropCantaloupe;
 
-  /// Honeydew crop name
+  /// No description provided for @cropHoneydew.
   ///
   /// In ar, this message translates to:
   /// **'كنتالوب'**
   String get cropHoneydew;
 
-  /// Cucumber crop name
+  /// No description provided for @cropCucumber.
   ///
   /// In ar, this message translates to:
   /// **'خيار'**
   String get cropCucumber;
 
-  /// Squash crop name
+  /// No description provided for @cropSquash.
   ///
   /// In ar, this message translates to:
   /// **'كوسة'**
   String get cropSquash;
 
-  /// Zucchini crop name
+  /// No description provided for @cropZucchini.
   ///
   /// In ar, this message translates to:
   /// **'قرع'**
   String get cropZucchini;
 
-  /// Today's weather label
+  /// No description provided for @weatherToday.
   ///
   /// In ar, this message translates to:
   /// **'الطقس اليوم'**
   String get weatherToday;
 
-  /// Temperature label
+  /// No description provided for @temperature.
   ///
   /// In ar, this message translates to:
   /// **'درجة الحرارة'**
   String get temperature;
 
-  /// Humidity label
+  /// No description provided for @humidity.
   ///
   /// In ar, this message translates to:
   /// **'الرطوبة'**
   String get humidity;
 
-  /// Wind speed label
+  /// No description provided for @windSpeed.
   ///
   /// In ar, this message translates to:
   /// **'سرعة الرياح'**
   String get windSpeed;
 
-  /// Rain expected alert
+  /// No description provided for @rainExpected.
   ///
   /// In ar, this message translates to:
   /// **'متوقع هطول أمطار'**
   String get rainExpected;
 
-  /// Settings page title
+  /// No description provided for @settings.
   ///
   /// In ar, this message translates to:
   /// **'الإعدادات'**
   String get settings;
 
-  /// Language setting label
+  /// No description provided for @language.
   ///
   /// In ar, this message translates to:
   /// **'اللغة'**
   String get language;
 
-  /// Arabic language name
+  /// No description provided for @arabic.
   ///
   /// In ar, this message translates to:
   /// **'العربية'**
   String get arabic;
 
-  /// English language name
+  /// No description provided for @english.
   ///
   /// In ar, this message translates to:
   /// **'الإنجليزية'**
   String get english;
 
-  /// Save button
+  /// No description provided for @save.
   ///
   /// In ar, this message translates to:
   /// **'حفظ'**
   String get save;
 
-  /// Cancel button
+  /// No description provided for @cancel.
   ///
   /// In ar, this message translates to:
   /// **'إلغاء'**
   String get cancel;
 
-  /// Confirm button
+  /// No description provided for @confirm.
   ///
   /// In ar, this message translates to:
   /// **'تأكيد'**
   String get confirm;
+
+  /// No description provided for @retry.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة المحاولة'**
+  String get retry;
 
   /// Generic error message
   ///
@@ -307,12 +397,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'لا يوجد اتصال بالإنترنت'**
   String get errorNoInternet;
-
-  /// Retry button
-  ///
-  /// In ar, this message translates to:
-  /// **'إعادة المحاولة'**
-  String get retry;
 }
 
 class _AppLocalizationsDelegate

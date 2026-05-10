@@ -13,11 +13,53 @@
   "welcome": "مرحباً بك في فدان",
   "@welcome": { "description": "Welcome message" },
 
+  "addFirstFarm": "أضف مزرعتك الأولى للبدء",
+  "@addFirstFarm": { "description": "Empty state prompt on home screen" },
+
   "myFarms": "مزارعي",
   "@myFarms": { "description": "My farms section label" },
 
   "addFarm": "إضافة مزرعة",
   "@addFarm": { "description": "Add farm button" },
+
+  "farmProfileTitle": "إضافة مزرعة",
+  "@farmProfileTitle": { "description": "Farm profile page title" },
+
+  "farmNameLabel": "اسم المزرعة",
+  "@farmNameLabel": { "description": "Farm name field label" },
+
+  "farmNameHint": "مثال: مزرعة الفيوم",
+  "@farmNameHint": { "description": "Farm name field hint" },
+
+  "farmLocationTitle": "موقع المزرعة",
+  "@farmLocationTitle": { "description": "Location section title" },
+
+  "useCurrentLocation": "استخدام موقعي الحالي",
+  "@useCurrentLocation": { "description": "Use GPS location button" },
+
+  "locating": "جارٍ تحديد الموقع...",
+  "@locating": { "description": "Locating status text" },
+
+  "locationSet": "الموقع المحدد",
+  "@locationSet": { "description": "Location confirmed label" },
+
+  "updateLocation": "إعادة تحديد الموقع",
+  "@updateLocation": { "description": "Update location button" },
+
+  "cropsTitle": "المحاصيل",
+  "@cropsTitle": { "description": "Crops section title" },
+
+  "cropsSubtitle": "اختر محاصيل مزرعتك",
+  "@cropsSubtitle": { "description": "Crops section subtitle" },
+
+  "saveFarm": "حفظ المزرعة",
+  "@saveFarm": { "description": "Save farm button" },
+
+  "farmSavedSuccess": "تم حفظ المزرعة بنجاح",
+  "@farmSavedSuccess": { "description": "Farm saved success message" },
+
+  "locationPermissionDenied": "تم رفض إذن الموقع — يرجى السماح من الإعدادات",
+  "@locationPermissionDenied": { "description": "Location permission denied error" },
 
   "todayTasks": "مهام اليوم",
   "@todayTasks": { "description": "Today's tasks section" },
@@ -35,77 +77,35 @@
   "@spray": { "description": "Spraying task type" },
 
   "cropTomato": "طماطم",
-  "@cropTomato": { "description": "Tomato crop name" },
-
   "cropPotato": "بطاطس",
-  "@cropPotato": { "description": "Potato crop name" },
-
   "cropEggplant": "باذنجان",
-  "@cropEggplant": { "description": "Eggplant crop name" },
-
   "cropPepper": "فلفل",
-  "@cropPepper": { "description": "Pepper crop name" },
-
   "cropWatermelon": "بطيخ",
-  "@cropWatermelon": { "description": "Watermelon crop name" },
-
   "cropCantaloupe": "شمام",
-  "@cropCantaloupe": { "description": "Cantaloupe crop name" },
-
   "cropHoneydew": "كنتالوب",
-  "@cropHoneydew": { "description": "Honeydew crop name" },
-
   "cropCucumber": "خيار",
-  "@cropCucumber": { "description": "Cucumber crop name" },
-
   "cropSquash": "كوسة",
-  "@cropSquash": { "description": "Squash crop name" },
-
   "cropZucchini": "قرع",
-  "@cropZucchini": { "description": "Zucchini crop name" },
 
   "weatherToday": "الطقس اليوم",
-  "@weatherToday": { "description": "Today's weather label" },
-
   "temperature": "درجة الحرارة",
-  "@temperature": { "description": "Temperature label" },
-
   "humidity": "الرطوبة",
-  "@humidity": { "description": "Humidity label" },
-
   "windSpeed": "سرعة الرياح",
-  "@windSpeed": { "description": "Wind speed label" },
-
   "rainExpected": "متوقع هطول أمطار",
-  "@rainExpected": { "description": "Rain expected alert" },
 
   "settings": "الإعدادات",
-  "@settings": { "description": "Settings page title" },
-
   "language": "اللغة",
-  "@language": { "description": "Language setting label" },
-
   "arabic": "العربية",
-  "@arabic": { "description": "Arabic language name" },
-
   "english": "الإنجليزية",
-  "@english": { "description": "English language name" },
 
   "save": "حفظ",
-  "@save": { "description": "Save button" },
-
   "cancel": "إلغاء",
-  "@cancel": { "description": "Cancel button" },
-
   "confirm": "تأكيد",
-  "@confirm": { "description": "Confirm button" },
+  "retry": "إعادة المحاولة",
 
   "errorGeneric": "حدث خطأ، يرجى المحاولة مرة أخرى",
   "@errorGeneric": { "description": "Generic error message" },
 
   "errorNoInternet": "لا يوجد اتصال بالإنترنت",
-  "@errorNoInternet": { "description": "No internet error message" },
-
-  "retry": "إعادة المحاولة",
-  "@retry": { "description": "Retry button" }
+  "@errorNoInternet": { "description": "No internet error message" }
 }

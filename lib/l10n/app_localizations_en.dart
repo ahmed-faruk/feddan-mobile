@@ -21,10 +21,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcome => 'Welcome to Feddan';
 
   @override
+  String get addFirstFarm => 'Add your first farm to get started';
+
+  @override
   String get myFarms => 'My Farms';
 
   @override
   String get addFarm => 'Add Farm';
+
+  @override
+  String get farmProfileTitle => 'Add Farm';
+
+  @override
+  String get farmNameLabel => 'Farm Name';
+
+  @override
+  String get farmNameHint => 'e.g. North Farm';
+
+  @override
+  String get farmLocationTitle => 'Farm Location';
+
+  @override
+  String get useCurrentLocation => 'Use my current location';
+
+  @override
+  String get locating => 'Locating...';
+
+  @override
+  String get locationSet => 'Location set';
+
+  @override
+  String get updateLocation => 'Update location';
+
+  @override
+  String get cropsTitle => 'Crops';
+
+  @override
+  String get cropsSubtitle => 'Select your farm crops';
+
+  @override
+  String get saveFarm => 'Save Farm';
+
+  @override
+  String get farmSavedSuccess => 'Farm saved successfully';
+
+  @override
+  String get locationPermissionDenied =>
+      'Location permission denied — please allow in Settings';
 
   @override
   String get todayTasks => 'Today\'s Tasks';
@@ -108,11 +151,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirm => 'Confirm';
 
   @override
+  String get retry => 'Retry';
+
+  @override
   String get errorGeneric => 'Something went wrong, please try again';
 
   @override
   String get errorNoInternet => 'No internet connection';
-
-  @override
-  String get retry => 'Retry';
 }

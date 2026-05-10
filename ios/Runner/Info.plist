@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>نحتاج إلى موقعك لتحديد موقع مزرعتك على الخريطة</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>نحتاج إلى موقعك لتحديد موقع مزرعتك على الخريطة</string>
 </dict>
 </plist>

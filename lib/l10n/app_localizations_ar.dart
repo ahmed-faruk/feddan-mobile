@@ -21,10 +21,53 @@ class AppLocalizationsAr extends AppLocalizations {
   String get welcome => 'مرحباً بك في فدان';
 
   @override
+  String get addFirstFarm => 'أضف مزرعتك الأولى للبدء';
+
+  @override
   String get myFarms => 'مزارعي';
 
   @override
   String get addFarm => 'إضافة مزرعة';
+
+  @override
+  String get farmProfileTitle => 'إضافة مزرعة';
+
+  @override
+  String get farmNameLabel => 'اسم المزرعة';
+
+  @override
+  String get farmNameHint => 'مثال: مزرعة الفيوم';
+
+  @override
+  String get farmLocationTitle => 'موقع المزرعة';
+
+  @override
+  String get useCurrentLocation => 'استخدام موقعي الحالي';
+
+  @override
+  String get locating => 'جارٍ تحديد الموقع...';
+
+  @override
+  String get locationSet => 'الموقع المحدد';
+
+  @override
+  String get updateLocation => 'إعادة تحديد الموقع';
+
+  @override
+  String get cropsTitle => 'المحاصيل';
+
+  @override
+  String get cropsSubtitle => 'اختر محاصيل مزرعتك';
+
+  @override
+  String get saveFarm => 'حفظ المزرعة';
+
+  @override
+  String get farmSavedSuccess => 'تم حفظ المزرعة بنجاح';
+
+  @override
+  String get locationPermissionDenied =>
+      'تم رفض إذن الموقع — يرجى السماح من الإعدادات';
 
   @override
   String get todayTasks => 'مهام اليوم';
@@ -108,11 +151,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirm => 'تأكيد';
 
   @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
   String get errorGeneric => 'حدث خطأ، يرجى المحاولة مرة أخرى';
 
   @override
   String get errorNoInternet => 'لا يوجد اتصال بالإنترنت';
-
-  @override
-  String get retry => 'إعادة المحاولة';
 }

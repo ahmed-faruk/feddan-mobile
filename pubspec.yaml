@@ -46,7 +46,7 @@ dependencies:
   # Notifications
   flutter_local_notifications: ^17.0.0
 
-  # Code generation annotations (builders added per feature)
+  # Code generation annotations
   json_annotation: ^4.9.0
 
 dev_dependencies:
@@ -57,7 +57,40 @@ dev_dependencies:
   json_serializable: ^6.8.0
   bloc_test: ^9.1.7
   mocktail: ^1.0.4
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
+
+# ── App Icon ────────────────────────────────────────────────────────────────
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#1B5E20"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
+  web:
+    generate: false
+  windows:
+    generate: false
+  macos:
+    generate: false
+
+# ── Native Splash Screen ────────────────────────────────────────────────────
+flutter_native_splash:
+  color: "#2E7D32"
+  image: assets/icon/app_icon.png
+  color_dark: "#1B5E20"
+  image_dark: assets/icon/app_icon.png
+  android: true
+  ios: true
+  fullscreen: false
+  android_12:
+    color: "#2E7D32"
+    icon_background_color: "#1B5E20"
+    image: assets/icon/app_icon.png
 
 flutter:
   generate: true
   uses-material-design: true
+  assets:
+    - assets/icon/

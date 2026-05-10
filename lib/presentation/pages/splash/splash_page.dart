@@ -15,11 +15,12 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    _navigate();
+    // Wait one frame so the native splash transitions smoothly,
+    // then check Firebase cached auth state (no network call needed).
+    WidgetsBinding.instance.addPostFrameCallback((_) => _navigate());
   }
 
-  Future<void> _navigate() async {
-    await Future.delayed(const Duration(seconds: 2));
+  void _navigate() {
     if (!mounted) return;
     final user = FirebaseAuth.instance.currentUser;
     context.go(user != null ? '/home' : '/auth');

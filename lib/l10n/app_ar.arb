@@ -4,8 +4,66 @@
   "appName": "فدان",
   "@appName": { "description": "Application name" },
 
+  "tagline": "مساعدك الزراعي الذكي",
+  "@tagline": { "description": "App tagline shown on auth screen" },
+
   "splashLoading": "جارٍ التحميل...",
   "@splashLoading": { "description": "Loading text on splash screen" },
+
+  "signIn": "سجل دخولك",
+  "@signIn": { "description": "Sign in heading" },
+
+  "phoneSubtitle": "أدخل رقم هاتفك لتلقي رمز التحقق",
+  "@phoneSubtitle": { "description": "Phone input subtitle" },
+
+  "countryCode": "كود",
+  "@countryCode": { "description": "Country code field label" },
+
+  "phoneLabel": "رقم الهاتف",
+  "@phoneLabel": { "description": "Phone number field label" },
+
+  "sendCode": "إرسال رمز التحقق",
+  "@sendCode": { "description": "Send OTP button" },
+
+  "smsHint": "سنرسل لك رمزاً مكوناً من 6 أرقام عبر رسالة نصية",
+  "@smsHint": { "description": "SMS hint below send button" },
+
+  "back": "رجوع",
+  "@back": { "description": "Back button label" },
+
+  "enterCode": "أدخل رمز التحقق",
+  "@enterCode": { "description": "OTP heading" },
+
+  "codeSentTo": "أُرسل الرمز إلى {phone}",
+  "@codeSentTo": {
+    "description": "OTP sent confirmation",
+    "placeholders": {
+      "phone": { "type": "String" }
+    }
+  },
+
+  "verify": "تحقق",
+  "@verify": { "description": "Verify OTP button" },
+
+  "resendIn": "إعادة الإرسال خلال {seconds} ث",
+  "@resendIn": {
+    "description": "Resend countdown",
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+
+  "resendCode": "إعادة إرسال الرمز",
+  "@resendCode": { "description": "Resend code button" },
+
+  "orDivider": "أو",
+  "@orDivider": { "description": "Divider between auth options" },
+
+  "signInWithGoogle": "تسجيل الدخول عبر جوجل",
+  "@signInWithGoogle": { "description": "Google Sign-In button" },
+
+  "signOut": "تسجيل الخروج",
+  "@signOut": { "description": "Sign out button" },
 
   "homeTitle": "مزرعتي",
   "@homeTitle": { "description": "Home page title" },
@@ -13,17 +71,96 @@
   "welcome": "مرحباً بك في فدان",
   "@welcome": { "description": "Welcome message" },
 
+  "welcomeBody": "أضف مزرعتك الأولى لتبدأ في استقبال\nمهام الري والتسميد اليومية",
+  "@welcomeBody": { "description": "Welcome body text in empty state" },
+
   "addFirstFarm": "أضف مزرعتك الأولى للبدء",
-  "@addFirstFarm": { "description": "Empty state prompt on home screen" },
+  "@addFirstFarm": { "description": "Empty state prompt" },
 
   "myFarms": "مزارعي",
   "@myFarms": { "description": "My farms section label" },
 
+  "farmCount": "{count, plural, =1{{count} مزرعة} other{{count} مزارع}}",
+  "@farmCount": {
+    "description": "Farm count label",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
   "addFarm": "إضافة مزرعة",
   "@addFarm": { "description": "Add farm button" },
 
+  "add": "إضافة",
+  "@add": { "description": "Short add label for chip" },
+
+  "todayTasks": "مهام اليوم",
+  "@todayTasks": { "description": "Today's tasks section" },
+
+  "noTasksToday": "لا توجد مهام اليوم",
+  "@noTasksToday": { "description": "Empty tasks message" },
+
+  "tasksArriveDaily": "ستصلك المهام يومياً عند الساعة 6 صباحاً",
+  "@tasksArriveDaily": { "description": "Hint below empty tasks" },
+
+  "tasksLoadError": "فشل تحميل المهام — اسحب للأسفل لإعادة المحاولة",
+  "@tasksLoadError": { "description": "Task load error message" },
+
+  "offlineBanner": "أنت غير متصل — تعرض بيانات محفوظة مسبقاً",
+  "@offlineBanner": { "description": "Banner shown when farm list is served from Hive cache" },
+
+  "taskUpdateError": "فشل تحديث المهمة — تحقق من الاتصال",
+  "@taskUpdateError": { "description": "Task action error message" },
+
+  "priorityHigh": "عاجل",
+  "@priorityHigh": { "description": "High priority badge" },
+
+  "priorityNormal": "اليوم",
+  "@priorityNormal": { "description": "Normal priority badge" },
+
+  "priorityLow": "اختياري",
+  "@priorityLow": { "description": "Low priority badge" },
+
+  "taskDone": "تم",
+  "@taskDone": { "description": "Mark task done tooltip" },
+
+  "taskSkip": "تخطي",
+  "@taskSkip": { "description": "Skip task tooltip" },
+
+  "waterDemand": "{mm} مم",
+  "@waterDemand": {
+    "description": "Water demand label with unit",
+    "placeholders": {
+      "mm": { "type": "String" }
+    }
+  },
+
   "farmProfileTitle": "إضافة مزرعة",
-  "@farmProfileTitle": { "description": "Farm profile page title" },
+  "@farmProfileTitle": { "description": "Farm profile create title" },
+
+  "editFarm": "تعديل المزرعة",
+  "@editFarm": { "description": "Farm profile edit title" },
+
+  "deleteFarmTooltip": "حذف المزرعة",
+  "@deleteFarmTooltip": { "description": "Delete farm icon tooltip" },
+
+  "deleteFarmTitle": "حذف المزرعة؟",
+  "@deleteFarmTitle": { "description": "Delete farm dialog title" },
+
+  "deleteFarmWarning": "سيتم حذف هذه المزرعة نهائياً ولا يمكن التراجع عن ذلك.",
+  "@deleteFarmWarning": { "description": "Delete farm dialog body" },
+
+  "delete": "حذف",
+  "@delete": { "description": "Delete confirm button" },
+
+  "farmSavedSuccess": "تم حفظ المزرعة بنجاح",
+  "@farmSavedSuccess": { "description": "Farm saved success message" },
+
+  "farmUpdatedSuccess": "تم تحديث المزرعة بنجاح",
+  "@farmUpdatedSuccess": { "description": "Farm updated success message" },
+
+  "farmDeletedSuccess": "تم حذف المزرعة",
+  "@farmDeletedSuccess": { "description": "Farm deleted success message" },
 
   "farmNameLabel": "اسم المزرعة",
   "@farmNameLabel": { "description": "Farm name field label" },
@@ -43,6 +180,9 @@
   "locationSet": "الموقع المحدد",
   "@locationSet": { "description": "Location confirmed label" },
 
+  "tapMapToAdjust": "اضغط على الخريطة لضبط الموقع",
+  "@tapMapToAdjust": { "description": "Hint to tap map for fine adjustment" },
+
   "updateLocation": "إعادة تحديد الموقع",
   "@updateLocation": { "description": "Update location button" },
 
@@ -52,20 +192,38 @@
   "cropsSubtitle": "اختر محاصيل مزرعتك",
   "@cropsSubtitle": { "description": "Crops section subtitle" },
 
+  "plantingDate": "تاريخ الزراعة",
+  "@plantingDate": { "description": "Planting date section title" },
+
+  "plantingDateSubtitle": "متى زرعت هذا الموسم؟",
+  "@plantingDateSubtitle": { "description": "Planting date subtitle" },
+
+  "selectDate": "اختر التاريخ",
+  "@selectDate": { "description": "Date picker placeholder" },
+
   "saveFarm": "حفظ المزرعة",
   "@saveFarm": { "description": "Save farm button" },
 
-  "farmSavedSuccess": "تم حفظ المزرعة بنجاح",
-  "@farmSavedSuccess": { "description": "Farm saved success message" },
+  "updateFarm": "تحديث المزرعة",
+  "@updateFarm": { "description": "Update farm button" },
 
   "locationPermissionDenied": "تم رفض إذن الموقع — يرجى السماح من الإعدادات",
   "@locationPermissionDenied": { "description": "Location permission denied error" },
 
-  "todayTasks": "مهام اليوم",
-  "@todayTasks": { "description": "Today's tasks section" },
+  "weatherToday": "الطقس اليوم",
+  "@weatherToday": { "description": "Weather section title" },
 
-  "noTasksToday": "لا توجد مهام اليوم",
-  "@noTasksToday": { "description": "Empty tasks message" },
+  "et0Label": "الاحتياج المائي",
+  "@et0Label": { "description": "ET0 label" },
+
+  "rainfallLabel": "هطول",
+  "@rainfallLabel": { "description": "Rainfall label" },
+
+  "temperature": "درجة الحرارة",
+  "maxTemp": "الحرارة القصوى",
+  "humidity": "الرطوبة",
+  "windSpeed": "سرعة الرياح",
+  "rainExpected": "متوقع هطول أمطار",
 
   "irrigate": "ري",
   "@irrigate": { "description": "Irrigation task type" },
@@ -73,8 +231,8 @@
   "fertilize": "تسميد",
   "@fertilize": { "description": "Fertilization task type" },
 
-  "spray": "رش",
-  "@spray": { "description": "Spraying task type" },
+  "inspect": "تفتيش",
+  "@inspect": { "description": "Inspection task type" },
 
   "cropTomato": "طماطم",
   "cropPotato": "بطاطس",
@@ -87,16 +245,17 @@
   "cropSquash": "كوسة",
   "cropZucchini": "قرع",
 
-  "weatherToday": "الطقس اليوم",
-  "temperature": "درجة الحرارة",
-  "humidity": "الرطوبة",
-  "windSpeed": "سرعة الرياح",
-  "rainExpected": "متوقع هطول أمطار",
-
   "settings": "الإعدادات",
+  "@settings": { "description": "Settings page title" },
+
   "language": "اللغة",
+  "@language": { "description": "Language setting label" },
+
   "arabic": "العربية",
+  "@arabic": { "description": "Arabic language option" },
+
   "english": "الإنجليزية",
+  "@english": { "description": "English language option" },
 
   "save": "حفظ",
   "cancel": "إلغاء",

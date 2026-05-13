@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../config/di/injection.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../domain/entities/farm_entity.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../blocs/farm/farm_bloc.dart';
 import '../../blocs/language/language_bloc.dart';
 
 class FarmProfilePage extends StatelessWidget {
-  const FarmProfilePage({super.key});
+  const FarmProfilePage({super.key, this.existingFarm});
+
+  final FarmEntity? existingFarm;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<FarmBloc>(),
+      create: (_) => FarmBloc(
+        createFarm: getIt(),
+        updateFarm: getIt(),
+        deleteFarm: getIt(),
+        existingFarm: existingFarm,
+      ),
       child: const _FarmProfileView(),
     );
   }
@@ -23,8 +33,36 @@ class FarmProfilePage extends StatelessWidget {
 class _FarmProfileView extends StatelessWidget {
   const _FarmProfileView();
 
+  void _confirmDelete(
+      BuildContext context, AppLocalizations l10n) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.deleteFarmTitle),
+        content: Text(l10n.deleteFarmWarning),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.read<FarmBloc>().add(const FarmDeleteRequested());
+            },
+            child: Text(
+              l10n.delete,
+              style: const TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isArabic =
         context.watch<LanguageBloc>().state.locale.languageCode == 'ar';
 
@@ -32,48 +70,76 @@ class _FarmProfileView extends StatelessWidget {
       listenWhen: (p, c) => p.status != c.status,
       listener: (context, state) {
         if (state.status == FarmStatus.success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                isArabic ? 'تم حفظ المزرعة بنجاح' : 'Farm saved successfully',
-              ),
-              backgroundColor: AppColors.primary,
-            ),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.isEditMode
+                ? l10n.farmUpdatedSuccess
+                : l10n.farmSavedSuccess),
+            backgroundColor: AppColors.primary,
+          ));
+          context.go('/home');
+        } else if (state.status == FarmStatus.deleted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(l10n.farmDeletedSuccess),
+            backgroundColor: AppColors.textSecondary,
+          ));
           context.go('/home');
         } else if (state.status == FarmStatus.failure &&
             state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage!),
-              backgroundColor: AppColors.error,
-            ),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.errorMessage!),
+            backgroundColor: AppColors.error,
+          ));
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(isArabic ? 'إضافة مزرعة' : 'Add Farm'),
-          leading: BackButton(onPressed: () => context.go('/home')),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _FarmNameField(isArabic: isArabic),
-              const SizedBox(height: 24),
-              _LocationSection(isArabic: isArabic),
-              const SizedBox(height: 24),
-              _CropSelectionSection(isArabic: isArabic),
-              const SizedBox(height: 24),
-              _PlantingDateSection(isArabic: isArabic),
-              const SizedBox(height: 32),
-              _SaveButton(isArabic: isArabic),
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
+      child: BlocBuilder<FarmBloc, FarmState>(
+        buildWhen: (p, c) =>
+            p.status != c.status || p.isEditMode != c.isEditMode,
+        builder: (context, state) {
+          final isBusy = state.status == FarmStatus.saving ||
+              state.status == FarmStatus.deleting;
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                  state.isEditMode ? l10n.editFarm : l10n.farmProfileTitle),
+              leading: BackButton(onPressed: () => context.go('/home')),
+              actions: [
+                if (state.isEditMode)
+                  IconButton(
+                    icon: isBusy && state.status == FarmStatus.deleting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2),
+                          )
+                        : const Icon(Icons.delete_outline),
+                    tooltip: l10n.deleteFarmTooltip,
+                    onPressed:
+                        isBusy ? null : () => _confirmDelete(context, l10n),
+                  ),
+              ],
+            ),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _FarmNameField(),
+                  const SizedBox(height: 24),
+                  _LocationSection(isArabic: isArabic),
+                  const SizedBox(height: 24),
+                  _CropSelectionSection(),
+                  const SizedBox(height: 24),
+                  _PlantingDateSection(isArabic: isArabic),
+                  const SizedBox(height: 32),
+                  _SaveButton(),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -81,17 +147,37 @@ class _FarmProfileView extends StatelessWidget {
 
 // ─── Farm Name ───────────────────────────────────────────────────────────────
 
-class _FarmNameField extends StatelessWidget {
-  final bool isArabic;
-  const _FarmNameField({required this.isArabic});
+class _FarmNameField extends StatefulWidget {
+  const _FarmNameField();
+
+  @override
+  State<_FarmNameField> createState() => _FarmNameFieldState();
+}
+
+class _FarmNameFieldState extends State<_FarmNameField> {
+  late final TextEditingController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl =
+        TextEditingController(text: context.read<FarmBloc>().state.name);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isArabic ? 'اسم المزرعة' : 'Farm Name',
+          l10n.farmNameLabel,
           style: Theme.of(context)
               .textTheme
               .titleMedium
@@ -99,12 +185,14 @@ class _FarmNameField extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         TextFormField(
+          controller: _ctrl,
           textAlign: TextAlign.start,
           decoration: InputDecoration(
-            hintText: isArabic ? 'مثال: مزرعة الفيوم' : 'e.g. North Farm',
+            hintText: l10n.farmNameHint,
             prefixIcon: const Icon(Icons.agriculture_outlined),
           ),
-          onChanged: (v) => context.read<FarmBloc>().add(FarmNameChanged(v)),
+          onChanged: (v) =>
+              context.read<FarmBloc>().add(FarmNameChanged(v)),
         ),
       ],
     );
@@ -119,11 +207,12 @@ class _LocationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isArabic ? 'موقع المزرعة' : 'Farm Location',
+          l10n.farmLocationTitle,
           style: Theme.of(context)
               .textTheme
               .titleMedium
@@ -139,7 +228,7 @@ class _LocationSection extends StatelessWidget {
             if (state.hasLocation) {
               return Column(
                 children: [
-                  _LocationDisplay(state: state, isArabic: isArabic),
+                  _MapPreview(state: state),
                   const SizedBox(height: 8),
                   Align(
                     alignment: AlignmentDirectional.centerStart,
@@ -147,16 +236,14 @@ class _LocationSection extends StatelessWidget {
                       onPressed: () => context
                           .read<FarmBloc>()
                           .add(const FarmLocationRequested()),
-                      icon: const Icon(Icons.refresh, size: 18),
-                      label: Text(
-                        isArabic ? 'إعادة تحديد الموقع' : 'Update location',
-                      ),
+                      icon: const Icon(Icons.my_location, size: 18),
+                      label: Text(l10n.updateLocation),
                     ),
                   ),
                 ],
               );
             }
-            return _LocationButton(state: state, isArabic: isArabic);
+            return _LocationButton(state: state);
           },
         ),
       ],
@@ -166,11 +253,11 @@ class _LocationSection extends StatelessWidget {
 
 class _LocationButton extends StatelessWidget {
   final FarmState state;
-  final bool isArabic;
-  const _LocationButton({required this.state, required this.isArabic});
+  const _LocationButton({required this.state});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isLocating = state.status == FarmStatus.locating;
     return OutlinedButton.icon(
       onPressed: isLocating
@@ -189,59 +276,84 @@ class _LocationButton extends StatelessWidget {
             )
           : const Icon(Icons.my_location, color: AppColors.primary),
       label: Text(
-        isLocating
-            ? (isArabic ? 'جارٍ تحديد الموقع...' : 'Locating...')
-            : (isArabic
-                ? 'استخدام موقعي الحالي'
-                : 'Use my current location'),
+        isLocating ? l10n.locating : l10n.useCurrentLocation,
         style: const TextStyle(color: AppColors.primary),
       ),
     );
   }
 }
 
-class _LocationDisplay extends StatelessWidget {
+class _MapPreview extends StatefulWidget {
   final FarmState state;
-  final bool isArabic;
-  const _LocationDisplay({required this.state, required this.isArabic});
+  const _MapPreview({required this.state});
+
+  @override
+  State<_MapPreview> createState() => _MapPreviewState();
+}
+
+class _MapPreviewState extends State<_MapPreview> {
+  GoogleMapController? _mapController;
+
+  LatLng get _position =>
+      LatLng(widget.state.latitude!, widget.state.longitude!);
+
+  @override
+  void didUpdateWidget(_MapPreview old) {
+    super.didUpdateWidget(old);
+    // Pan the camera when the GPS refreshes or user drags the pin.
+    if (old.state.latitude != widget.state.latitude ||
+        old.state.longitude != widget.state.longitude) {
+      _mapController?.animateCamera(
+          CameraUpdate.newLatLng(_position));
+    }
+  }
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withAlpha(20),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withAlpha(80)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.location_on, color: AppColors.primary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isArabic ? 'الموقع المحدد' : 'Location set',
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: SizedBox(
+            height: 200,
+            child: GoogleMap(
+              initialCameraPosition:
+                  CameraPosition(target: _position, zoom: 14),
+              markers: {
+                Marker(
+                  markerId: const MarkerId('farm'),
+                  position: _position,
+                  draggable: true,
+                  onDragEnd: (pos) => context.read<FarmBloc>().add(
+                        FarmLocationPinChanged(
+                            pos.latitude, pos.longitude),
+                      ),
                 ),
-                Text(
-                  '${state.latitude!.toStringAsFixed(5)}, ${state.longitude!.toStringAsFixed(5)}',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
+              },
+              onTap: (pos) => context.read<FarmBloc>().add(
+                    FarmLocationPinChanged(pos.latitude, pos.longitude),
                   ),
-                ),
-              ],
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              onMapCreated: (c) => _mapController = c,
             ),
           ),
-          const Icon(Icons.check_circle, color: AppColors.primary),
-        ],
-      ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          l10n.tapMapToAdjust,
+          style: const TextStyle(
+              color: AppColors.textSecondary, fontSize: 12),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
@@ -249,33 +361,29 @@ class _LocationDisplay extends StatelessWidget {
 // ─── Crop Selection ────────────────────────────────────────────────────────────
 
 class _CropSelectionSection extends StatelessWidget {
-  final bool isArabic;
-  const _CropSelectionSection({required this.isArabic});
+  const _CropSelectionSection();
 
   static const _arNames = {
-    'tomato': 'طماطم',
-    'potato': 'بطاطس',
-    'eggplant': 'باذنجان',
-    'pepper': 'فلفل',
-    'watermelon': 'بطيخ',
-    'cantaloupe': 'شمام',
-    'honeydew': 'كنتالوب',
-    'cucumber': 'خيار',
-    'squash': 'كوسة',
+    'tomato': 'طماطم', 'potato': 'بطاطس', 'eggplant': 'باذنجان',
+    'pepper': 'فلفل', 'watermelon': 'بطيخ', 'cantaloupe': 'شمام',
+    'honeydew': 'كنتالوب', 'cucumber': 'خيار', 'squash': 'كوسة',
     'zucchini': 'قرع',
   };
 
-  String _label(String crop) => isArabic
+  String _label(String crop, bool isArabic) => isArabic
       ? (_arNames[crop] ?? crop)
       : crop[0].toUpperCase() + crop.substring(1);
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isArabic =
+        context.watch<LanguageBloc>().state.locale.languageCode == 'ar';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isArabic ? 'المحاصيل' : 'Crops',
+          l10n.cropsTitle,
           style: Theme.of(context)
               .textTheme
               .titleMedium
@@ -283,7 +391,7 @@ class _CropSelectionSection extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          isArabic ? 'اختر محاصيل مزرعتك' : 'Select your farm crops',
+          l10n.cropsSubtitle,
           style: Theme.of(context)
               .textTheme
               .bodySmall
@@ -299,14 +407,16 @@ class _CropSelectionSection extends StatelessWidget {
               children: AppConstants.supportedCrops.map((crop) {
                 final selected = state.selectedCrops.contains(crop);
                 return FilterChip(
-                  label: Text(_label(crop)),
+                  label: Text(_label(crop, isArabic)),
                   selected: selected,
                   onSelected: (_) =>
                       context.read<FarmBloc>().add(FarmCropToggled(crop)),
                   selectedColor: AppColors.primary.withAlpha(40),
                   checkmarkColor: AppColors.primary,
                   labelStyle: TextStyle(
-                    color: selected ? AppColors.primary : AppColors.textPrimary,
+                    color: selected
+                        ? AppColors.primary
+                        : AppColors.textPrimary,
                     fontWeight:
                         selected ? FontWeight.w600 : FontWeight.normal,
                   ),
@@ -328,11 +438,12 @@ class _PlantingDateSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isArabic ? 'تاريخ الزراعة' : 'Planting Date',
+          l10n.plantingDate,
           style: Theme.of(context)
               .textTheme
               .titleMedium
@@ -340,7 +451,7 @@ class _PlantingDateSection extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          isArabic ? 'متى زرعت هذا الموسم؟' : 'When did you plant this season?',
+          l10n.plantingDateSubtitle,
           style: Theme.of(context)
               .textTheme
               .bodySmall
@@ -356,9 +467,12 @@ class _PlantingDateSection extends StatelessWidget {
                 final picked = await showDatePicker(
                   context: context,
                   initialDate: date ?? DateTime.now(),
-                  firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                  firstDate: DateTime.now()
+                      .subtract(const Duration(days: 365)),
                   lastDate: DateTime.now(),
-                  locale: isArabic ? const Locale('ar') : const Locale('en'),
+                  locale: isArabic
+                      ? const Locale('ar')
+                      : const Locale('en'),
                 );
                 if (picked != null && context.mounted) {
                   context
@@ -368,7 +482,8 @@ class _PlantingDateSection extends StatelessWidget {
               },
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: date != null
@@ -393,7 +508,7 @@ class _PlantingDateSection extends StatelessWidget {
                     Text(
                       date != null
                           ? '${date.day}/${date.month}/${date.year}'
-                          : (isArabic ? 'اختر التاريخ' : 'Select date'),
+                          : l10n.selectDate,
                       style: TextStyle(
                         color: date != null
                             ? AppColors.primary
@@ -405,7 +520,8 @@ class _PlantingDateSection extends StatelessWidget {
                     ),
                     const Spacer(),
                     if (date != null)
-                      const Icon(Icons.check_circle, color: AppColors.primary),
+                      const Icon(Icons.check_circle,
+                          color: AppColors.primary),
                   ],
                 ),
               ),
@@ -420,29 +536,31 @@ class _PlantingDateSection extends StatelessWidget {
 // ─── Save Button ───────────────────────────────────────────────────────────────
 
 class _SaveButton extends StatelessWidget {
-  final bool isArabic;
-  const _SaveButton({required this.isArabic});
+  const _SaveButton();
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<FarmBloc, FarmState>(
-      buildWhen: (p, c) => p.isValid != c.isValid || p.status != c.status,
+      buildWhen: (p, c) =>
+          p.isValid != c.isValid ||
+          p.status != c.status ||
+          p.isEditMode != c.isEditMode,
       builder: (context, state) {
         final isSaving = state.status == FarmStatus.saving;
         return ElevatedButton(
           onPressed: (state.isValid && !isSaving)
-              ? () => context.read<FarmBloc>().add(const FarmSaveRequested())
+              ? () =>
+                  context.read<FarmBloc>().add(const FarmSaveRequested())
               : null,
           child: isSaving
               ? const SizedBox(
                   height: 20,
                   width: 20,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
+                      color: Colors.white, strokeWidth: 2),
                 )
-              : Text(isArabic ? 'حفظ المزرعة' : 'Save Farm'),
+              : Text(state.isEditMode ? l10n.updateFarm : l10n.saveFarm),
         );
       },
     );

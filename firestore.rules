@@ -10,9 +10,33 @@ service cloud.firestore {
     // Farms: creator must set themselves as owner; only owner can read/modify
     match /farms/{farmId} {
       allow create: if request.auth != null
-          && request.resource.data.ownerId == request.auth.uid;
-      allow read, update, delete: if request.auth != null
+          && request.resource.data.ownerId == request.auth.uid
+          && request.resource.data.name is string
+          && request.resource.data.name.size() >= 1
+          && request.resource.data.name.size() <= 100
+          && request.resource.data.cropTypes is list
+          && request.resource.data.cropTypes.size() >= 1
+          && request.resource.data.cropTypes.size() <= 10
+          && request.resource.data.cropTypes.hasOnly([
+              'tomato', 'potato', 'eggplant', 'pepper', 'watermelon',
+              'cantaloupe', 'honeydew', 'cucumber', 'squash', 'zucchini'
+          ]);
+      allow read, delete: if request.auth != null
           && resource.data.ownerId == request.auth.uid;
+      allow update: if request.auth != null
+          && resource.data.ownerId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['name', 'latitude', 'longitude', 'cropTypes', 'plantingDate'])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() >= 1
+          && request.resource.data.name.size() <= 100
+          && request.resource.data.cropTypes is list
+          && request.resource.data.cropTypes.size() >= 1
+          && request.resource.data.cropTypes.size() <= 10
+          && request.resource.data.cropTypes.hasOnly([
+              'tomato', 'potato', 'eggplant', 'pepper', 'watermelon',
+              'cantaloupe', 'honeydew', 'cucumber', 'squash', 'zucchini'
+          ]);
 
       // Tasks: ownerId is denormalised onto each task document by Cloud Functions.
       // No get() calls → no extra billed reads.

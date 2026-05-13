@@ -20,6 +20,26 @@ class FarmRemoteDataSource {
     return model;
   }
 
+  Future<void> updateFarm(String farmId, CreateFarmParams params) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw const AuthFailure('User not authenticated');
+
+    await _firestore.collection('farms').doc(farmId).update({
+      'name': params.name,
+      'latitude': params.latitude,
+      'longitude': params.longitude,
+      'cropTypes': params.cropTypes,
+      'plantingDate': Timestamp.fromDate(params.plantingDate),
+    });
+  }
+
+  Future<void> deleteFarm(String farmId) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw const AuthFailure('User not authenticated');
+
+    await _firestore.collection('farms').doc(farmId).delete();
+  }
+
   Future<List<FarmModel>> getFarms(String ownerId) async {
     final snapshot = await _firestore
         .collection('farms')

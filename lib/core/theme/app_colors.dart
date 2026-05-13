@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const primary = Color(0xFF2E7D32);
-  static const primaryDark = Color(0xFF1B5E20);
-  static const primaryLight = Color(0xFF4CAF50);
-  static const accent = Color(0xFFFFA000);
+  static const primary = Color(0xFF4A7C59);      // Nile Green — brand primary
+  static const primaryDark = Color(0xFF2D5A3D);  // darkened for pressed/header states
+  static const primaryLight = Color(0xFF6FA882); // lightened for chip backgrounds
+  static const accent = Color(0xFFB8860B);       // dark gold / ochre
   static const background = Color(0xFFF5F5F5);
   static const surface = Color(0xFFFFFFFF);
   static const error = Color(0xFFD32F2F);

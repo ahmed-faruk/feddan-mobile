@@ -47,6 +47,10 @@
 				</array>
 			</dict>
 		</dict>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+		</array>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>UILaunchStoryboardName</key>
@@ -68,9 +72,35 @@
 		</array>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>نحتاج إلى موقعك لتحديد موقع مزرعتك على الخريطة</string>
-		<key>NSLocationAlwaysUsageDescription</key>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 		<string>نحتاج إلى موقعك لتحديد موقع مزرعتك على الخريطة</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<!-- H1: Maps API key — sourced from SecretKeys.xcconfig via $(MAPS_API_KEY).
+		     AppDelegate.swift reads this at runtime to initialise the Maps SDK. -->
+		<key>MAPS_API_KEY</key>
+		<string>$(MAPS_API_KEY)</string>
+		<!-- H1: Google Sign-In redirect URI — sourced from SecretKeys.xcconfig. -->
+		<!-- Firebase Phone Auth reCAPTCHA scheme — required by PhoneAuthProvider on iOS.
+		     Scheme = "app-1-{PROJECT_NUMBER}-ios-{APP_ID_SUFFIX}" from firebase_options.dart. -->
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>$(REVERSED_CLIENT_ID)</string>
+				</array>
+			</dict>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>app-1-991040162518-ios-a3173f77b559478a7a5777</string>
+				</array>
+			</dict>
+		</array>
 	</dict>
 </plist>

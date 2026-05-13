@@ -6,6 +6,8 @@ import '../../../config/di/injection.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../domain/entities/farm_entity.dart';
 import '../../../domain/entities/task_entity.dart';
+import '../../../domain/entities/weather_snapshot.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/farm_list/farm_list_cubit.dart';
 import '../../blocs/farm_list/farm_list_state.dart';
@@ -34,12 +36,12 @@ class _HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isArabic =
         context.watch<LanguageBloc>().state.locale.languageCode == 'ar';
 
     return MultiBlocListener(
       listeners: [
-        // Load tasks when farms finish loading
         BlocListener<FarmListCubit, FarmListState>(
           listenWhen: (p, c) =>
               p.status != c.status && c.status == FarmListStatus.loaded,
@@ -47,20 +49,16 @@ class _HomeView extends StatelessWidget {
             context.read<TaskBloc>().add(TasksLoadRequested(state.farmIds));
           },
         ),
-        // Show snackbar on task action errors (complete/skip failure)
         BlocListener<TaskBloc, TaskState>(
           listenWhen: (p, c) =>
               c.actionError != null && p.actionError != c.actionError,
           listener: (context, state) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.actionError!),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(l10n.taskUpdateError),
+              backgroundColor: AppColors.error,
+            ));
           },
         ),
-        // Redirect to auth when user signs out
         BlocListener<AuthBloc, AuthState>(
           listenWhen: (p, c) =>
               p.status != c.status && c.status == AuthStatus.initial,
@@ -69,12 +67,15 @@ class _HomeView extends StatelessWidget {
       ],
       child: Scaffold(
         appBar: AppBar(
-          title: Text(isArabic ? 'فدان' : 'Feddan'),
+          title: Text(l10n.appName),
           actions: [
+            // Language toggle
             TextButton(
               onPressed: () => context.read<LanguageBloc>().add(
                     LanguageChanged(
-                      isArabic ? const Locale('en') : const Locale('ar'),
+                      isArabic
+                          ? const Locale('en')
+                          : const Locale('ar'),
                     ),
                   ),
               child: Text(
@@ -87,8 +88,13 @@ class _HomeView extends StatelessWidget {
               ),
             ),
             IconButton(
+              icon: const Icon(Icons.settings_outlined, color: Colors.white),
+              tooltip: l10n.settings,
+              onPressed: () => context.push('/settings'),
+            ),
+            IconButton(
               icon: const Icon(Icons.logout, color: Colors.white),
-              tooltip: isArabic ? 'تسجيل الخروج' : 'Sign out',
+              tooltip: l10n.signOut,
               onPressed: () =>
                   context.read<AuthBloc>().add(const AuthSignOutRequested()),
             ),
@@ -100,28 +106,41 @@ class _HomeView extends StatelessWidget {
           },
           child: BlocBuilder<FarmListCubit, FarmListState>(
             builder: (context, farmState) {
+              // Initial load or first-time loading with no data yet.
               if (farmState.status == FarmListStatus.initial ||
                   (farmState.status == FarmListStatus.loading &&
                       !farmState.hasFarms)) {
                 return const Center(child: CircularProgressIndicator());
               }
 
+              // M3: Both Firestore and Hive failed — explicit error card instead
+              // of a blank screen or infinite spinner.
+              if (farmState.status == FarmListStatus.failure) {
+                return _FarmLoadError(
+                  onRetry: () => context.read<FarmListCubit>().refresh(),
+                );
+              }
+
               if (farmState.status == FarmListStatus.loaded &&
                   !farmState.hasFarms) {
                 return ListView(
                   padding: const EdgeInsets.all(16),
-                  children: [_EmptyFarmsCard(isArabic: isArabic)],
+                  children: [_EmptyFarmsCard()],
                 );
               }
 
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _FarmSection(farms: farmState.farms, isArabic: isArabic),
-                  const SizedBox(height: 24),
-                  _TodayHeader(isArabic: isArabic),
+                  // H2: Show an offline banner when farms came from Hive cache.
+                  if (farmState.fromCache) const _OfflineBanner(),
+                  _FarmSection(farms: farmState.farms),
+                  const SizedBox(height: 16),
+                  _WeatherSection(farms: farmState.farms),
+                  const SizedBox(height: 8),
+                  _TodayHeader(),
                   const SizedBox(height: 12),
-                  _TaskList(isArabic: isArabic),
+                  _TaskList(),
                   const SizedBox(height: 80),
                 ],
               );
@@ -133,7 +152,7 @@ class _HomeView extends StatelessWidget {
           backgroundColor: AppColors.primary,
           icon: const Icon(Icons.add, color: Colors.white),
           label: Text(
-            isArabic ? 'إضافة مزرعة' : 'Add Farm',
+            l10n.addFarm,
             style: const TextStyle(color: Colors.white),
           ),
         ),
@@ -142,14 +161,89 @@ class _HomeView extends StatelessWidget {
   }
 }
 
-// ─── Empty State ──────────────────────────────────────────────────────────────
+// ─── Farm Load Error (M3) ─────────────────────────────────────────────────────
 
-class _EmptyFarmsCard extends StatelessWidget {
-  final bool isArabic;
-  const _EmptyFarmsCard({required this.isArabic});
+class _FarmLoadError extends StatelessWidget {
+  final VoidCallback onRetry;
+  const _FarmLoadError({required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off_outlined,
+                size: 56, color: AppColors.textSecondary),
+            const SizedBox(height: 16),
+            Text(
+              l10n.tasksLoadError,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: AppColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.retry),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Offline Banner (H2) ─────────────────────────────────────────────────────
+
+class _OfflineBanner extends StatelessWidget {
+  const _OfflineBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.accent.withAlpha(30),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.accent.withAlpha(80)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.wifi_off_rounded,
+              size: 16, color: AppColors.accent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              l10n.offlineBanner,
+              style: const TextStyle(
+                  color: AppColors.accent,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Empty State ──────────────────────────────────────────────────────────────
+
+class _EmptyFarmsCard extends StatelessWidget {
+  const _EmptyFarmsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
@@ -158,7 +252,7 @@ class _EmptyFarmsCard extends StatelessWidget {
             const Icon(Icons.agriculture, size: 64, color: AppColors.primary),
             const SizedBox(height: 16),
             Text(
-              isArabic ? 'مرحباً بك في فدان' : 'Welcome to Feddan',
+              l10n.welcome,
               style: Theme.of(context)
                   .textTheme
                   .titleLarge
@@ -167,9 +261,7 @@ class _EmptyFarmsCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              isArabic
-                  ? 'أضف مزرعتك الأولى لتبدأ في استقبال\nمهام الري والتسميد اليومية'
-                  : 'Add your first farm to start receiving\ndaily irrigation and fertilisation tasks',
+              l10n.welcomeBody,
               style: const TextStyle(
                   color: AppColors.textSecondary, height: 1.6),
               textAlign: TextAlign.center,
@@ -178,7 +270,7 @@ class _EmptyFarmsCard extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () => context.push('/farm-profile'),
               icon: const Icon(Icons.add),
-              label: Text(isArabic ? 'إضافة مزرعة' : 'Add Farm'),
+              label: Text(l10n.addFarm),
             ),
           ],
         ),
@@ -191,18 +283,18 @@ class _EmptyFarmsCard extends StatelessWidget {
 
 class _FarmSection extends StatelessWidget {
   final List<FarmEntity> farms;
-  final bool isArabic;
-  const _FarmSection({required this.farms, required this.isArabic});
+  const _FarmSection({required this.farms});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Text(
-              isArabic ? 'مزارعي' : 'My Farms',
+              l10n.myFarms,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -210,7 +302,7 @@ class _FarmSection extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              '${farms.length} ${isArabic ? (farms.length == 1 ? "مزرعة" : "مزارع") : (farms.length == 1 ? "farm" : "farms")}',
+              l10n.farmCount(farms.length),
               style: const TextStyle(
                   color: AppColors.textSecondary, fontSize: 13),
             ),
@@ -227,11 +319,12 @@ class _FarmSection extends StatelessWidget {
                 avatar: const Icon(Icons.add,
                     size: 16, color: AppColors.primary),
                 label: Text(
-                  isArabic ? 'إضافة' : 'Add',
+                  l10n.add,
                   style: const TextStyle(color: AppColors.primary),
                 ),
                 backgroundColor: AppColors.primary.withAlpha(20),
-                side: const BorderSide(color: AppColors.primary, width: 0.5),
+                side:
+                    const BorderSide(color: AppColors.primary, width: 0.5),
                 onPressed: () => context.push('/farm-profile'),
               ),
             ],
@@ -250,7 +343,7 @@ class _FarmChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: Chip(
+      child: ActionChip(
         avatar: const CircleAvatar(
           backgroundColor: AppColors.primary,
           child: Icon(Icons.agriculture, size: 14, color: Colors.white),
@@ -260,7 +353,115 @@ class _FarmChip extends StatelessWidget {
         backgroundColor: AppColors.surface,
         side: const BorderSide(color: AppColors.primary, width: 0.5),
         padding: const EdgeInsets.symmetric(horizontal: 4),
+        onPressed: () => context.push('/farm-profile', extra: farm),
       ),
+    );
+  }
+}
+
+// ─── Weather Section ──────────────────────────────────────────────────────────
+
+class _WeatherSection extends StatelessWidget {
+  final List<FarmEntity> farms;
+  const _WeatherSection({required this.farms});
+
+  @override
+  Widget build(BuildContext context) {
+    // Show weather for the first farm that has a latestWeather snapshot.
+    final WeatherSnapshot? weather =
+        farms.map((f) => f.latestWeather).whereType<WeatherSnapshot>().firstOrNull;
+
+    if (weather == null) return const SizedBox.shrink();
+
+    final l10n = AppLocalizations.of(context)!;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.wb_sunny_outlined,
+                    color: AppColors.accent, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.weatherToday,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _WeatherStat(
+                  icon: Icons.thermostat,
+                  iconColor: AppColors.error,
+                  value: '${weather.maxTempC.toStringAsFixed(0)}°',
+                  label: l10n.maxTemp,
+                ),
+                _WeatherStat(
+                  icon: Icons.water_drop_outlined,
+                  iconColor: AppColors.sky,
+                  value: '${weather.humidityPct.toStringAsFixed(0)}%',
+                  label: l10n.humidity,
+                ),
+                _WeatherStat(
+                  icon: Icons.umbrella_outlined,
+                  iconColor: AppColors.sky,
+                  value: '${weather.rainfall.toStringAsFixed(1)} مم',
+                  label: l10n.rainfallLabel,
+                ),
+                _WeatherStat(
+                  icon: Icons.water_drop,
+                  iconColor: AppColors.primary,
+                  value: '${weather.et0.toStringAsFixed(1)} مم',
+                  label: l10n.et0Label,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WeatherStat extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String value;
+  final String label;
+
+  const _WeatherStat({
+    required this.icon,
+    required this.iconColor,
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: iconColor, size: 22),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+              color: AppColors.textSecondary, fontSize: 11),
+        ),
+      ],
     );
   }
 }
@@ -268,18 +469,18 @@ class _FarmChip extends StatelessWidget {
 // ─── Today Header ─────────────────────────────────────────────────────────────
 
 class _TodayHeader extends StatelessWidget {
-  final bool isArabic;
-  const _TodayHeader({required this.isArabic});
+  const _TodayHeader();
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
         Text(
-          isArabic ? 'مهام اليوم' : "Today's Tasks",
+          l10n.todayTasks,
           style: Theme.of(context)
               .textTheme
               .titleLarge
@@ -299,8 +500,7 @@ class _TodayHeader extends StatelessWidget {
 // ─── Task List ────────────────────────────────────────────────────────────────
 
 class _TaskList extends StatelessWidget {
-  final bool isArabic;
-  const _TaskList({required this.isArabic});
+  const _TaskList();
 
   @override
   Widget build(BuildContext context) {
@@ -314,16 +514,16 @@ class _TaskList extends StatelessWidget {
               child: Center(child: CircularProgressIndicator()),
             );
           case TaskLoadStatus.failure:
-            return _TaskError(isArabic: isArabic);
+            return _TaskError();
           case TaskLoadStatus.loaded:
             if (state.tasks.isEmpty) {
-              return _NoTasksCard(isArabic: isArabic);
+              return _NoTasksCard();
             }
             return Column(
               children: state.tasks
                   .map((t) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: _TaskCard(task: t, isArabic: isArabic),
+                        child: _TaskCard(task: t),
                       ))
                   .toList(),
             );
@@ -334,11 +534,11 @@ class _TaskList extends StatelessWidget {
 }
 
 class _NoTasksCard extends StatelessWidget {
-  final bool isArabic;
-  const _NoTasksCard({required this.isArabic});
+  const _NoTasksCard();
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
@@ -346,15 +546,11 @@ class _NoTasksCard extends StatelessWidget {
           children: [
             const Icon(Icons.task_alt, size: 48, color: AppColors.primary),
             const SizedBox(height: 12),
-            Text(
-              isArabic ? 'لا توجد مهام اليوم' : 'No tasks today',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text(l10n.noTasksToday,
+                style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4),
             Text(
-              isArabic
-                  ? 'ستصلك المهام يومياً عند الساعة 6 صباحاً'
-                  : 'Tasks arrive daily at 6am Cairo time',
+              l10n.tasksArriveDaily,
               style: const TextStyle(
                   color: AppColors.textSecondary, fontSize: 13),
               textAlign: TextAlign.center,
@@ -367,11 +563,11 @@ class _NoTasksCard extends StatelessWidget {
 }
 
 class _TaskError extends StatelessWidget {
-  final bool isArabic;
-  const _TaskError({required this.isArabic});
+  const _TaskError();
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       color: AppColors.error.withAlpha(20),
       child: Padding(
@@ -382,9 +578,7 @@ class _TaskError extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                isArabic
-                    ? 'فشل تحميل المهام — اسحب للأسفل لإعادة المحاولة'
-                    : 'Failed to load tasks — pull to refresh',
+                l10n.tasksLoadError,
                 style: const TextStyle(color: AppColors.error),
               ),
             ),
@@ -399,8 +593,7 @@ class _TaskError extends StatelessWidget {
 
 class _TaskCard extends StatelessWidget {
   final TaskEntity task;
-  final bool isArabic;
-  const _TaskCard({required this.task, required this.isArabic});
+  const _TaskCard({required this.task});
 
   Color get _priorityColor => switch (task.priority) {
         TaskPriority.high => AppColors.error,
@@ -415,15 +608,19 @@ class _TaskCard extends StatelessWidget {
         TaskType.inspect => Icons.search,
       };
 
-  String get _priorityLabel => switch (task.priority) {
-        TaskPriority.high => isArabic ? 'عاجل' : 'URGENT',
-        TaskPriority.normal => isArabic ? 'اليوم' : 'TODAY',
-        TaskPriority.low => isArabic ? 'اختياري' : 'OPTIONAL',
+  String _priorityLabel(AppLocalizations l10n) => switch (task.priority) {
+        TaskPriority.high => l10n.priorityHigh,
+        TaskPriority.normal => l10n.priorityNormal,
+        TaskPriority.low => l10n.priorityLow,
       };
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isArabic =
+        context.watch<LanguageBloc>().state.locale.languageCode == 'ar';
     final isDone = task.status != TaskStatus.pending;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -452,7 +649,7 @@ class _TaskCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      _priorityLabel,
+                      _priorityLabel(l10n),
                       style: TextStyle(
                         color: _priorityColor,
                         fontSize: 11,
@@ -481,7 +678,8 @@ class _TaskCard extends StatelessWidget {
                             size: 13, color: AppColors.sky),
                         const SizedBox(width: 4),
                         Text(
-                          '${task.waterDemandMm!.toStringAsFixed(1)} ${isArabic ? "مم" : "mm"}',
+                          l10n.waterDemand(
+                              task.waterDemandMm!.toStringAsFixed(1)),
                           style: const TextStyle(
                               color: AppColors.sky, fontSize: 12),
                         ),
@@ -497,7 +695,7 @@ class _TaskCard extends StatelessWidget {
                   _ActionBtn(
                     icon: Icons.check_circle_outline,
                     color: AppColors.primary,
-                    tooltip: isArabic ? 'تم' : 'Done',
+                    tooltip: l10n.taskDone,
                     onTap: () => context.read<TaskBloc>().add(
                           TaskCompleted(
                               farmId: task.farmId, taskId: task.id),
@@ -507,7 +705,7 @@ class _TaskCard extends StatelessWidget {
                   _ActionBtn(
                     icon: Icons.close,
                     color: AppColors.textSecondary,
-                    tooltip: isArabic ? 'تخطي' : 'Skip',
+                    tooltip: l10n.taskSkip,
                     onTap: () => context.read<TaskBloc>().add(
                           TaskSkipped(
                               farmId: task.farmId, taskId: task.id),
@@ -537,6 +735,7 @@ class _ActionBtn extends StatelessWidget {
   final Color color;
   final String tooltip;
   final VoidCallback onTap;
+
   const _ActionBtn({
     required this.icon,
     required this.color,

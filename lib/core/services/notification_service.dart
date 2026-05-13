@@ -12,7 +12,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 Future<void> _backgroundMessageHandler(RemoteMessage message) async {
   // Firebase is already initialized. The OS auto-displays the notification;
   // we only need this handler if we want background data processing.
-  debugPrint('[FCM] Background: ${message.messageId}');
+  if (kDebugMode) debugPrint('[FCM] Background: ${message.messageId}');
 }
 
 class NotificationService {
@@ -112,9 +112,9 @@ class NotificationService {
         },
         SetOptions(merge: true),
       );
-      debugPrint('[FCM] Token saved for $uid');
+      if (kDebugMode) debugPrint('[FCM] Token saved for $uid');
     } catch (e) {
-      debugPrint('[FCM] Token save failed: $e');
+      if (kDebugMode) debugPrint('[FCM] Token save failed: $e');
     }
   }
 
@@ -143,6 +143,6 @@ class NotificationService {
   static void _onTap(RemoteMessage message) {
     // Navigation on notification tap — handled by the router;
     // data payload can carry route hints in future.
-    debugPrint('[FCM] Tapped: ${message.data}');
+    if (kDebugMode) debugPrint('[FCM] Tapped: ${message.data}');
   }
 }

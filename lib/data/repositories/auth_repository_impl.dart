@@ -38,5 +38,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> signInWithGoogle() async {
+    try {
+      await _remote.signInWithGoogle();
+    } on FirebaseAuthException {
+      rethrow;
+    } catch (e) {
+      throw FirebaseAuthException(code: 'unknown', message: e.toString());
+    }
+  }
+
+  @override
   Future<void> signOut() => _remote.signOut();
 }

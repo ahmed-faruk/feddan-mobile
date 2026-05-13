@@ -11,5 +11,7 @@ abstract class AuthRepository {
     required String otp,
   });
 
+  Future<void> signInWithGoogle();
+
   Future<void> signOut();
 }

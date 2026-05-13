@@ -24,6 +24,7 @@ dependencies:
   # Local storage
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  flutter_secure_storage: ^9.2.2
 
   # Dependency injection
   get_it: ^7.7.0
@@ -37,8 +38,8 @@ dependencies:
   # Maps
   google_maps_flutter: ^2.9.0
 
-  # HTTP
-  dio: ^5.7.0
+  # Auth — Google Sign-In
+  google_sign_in: ^6.2.1
 
   # Location
   geolocator: ^13.0.0
@@ -46,15 +47,10 @@ dependencies:
   # Notifications
   flutter_local_notifications: ^17.0.0
 
-  # Code generation annotations
-  json_annotation: ^4.9.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  build_runner: ^2.4.13
-  json_serializable: ^6.8.0
   bloc_test: ^9.1.7
   mocktail: ^1.0.4
   flutter_launcher_icons: ^0.13.1
@@ -66,7 +62,7 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/app_icon.png"
   min_sdk_android: 21
-  adaptive_icon_background: "#1B5E20"
+  adaptive_icon_background: "#2D5A3D"
   adaptive_icon_foreground: "assets/icon/app_icon.png"
   web:
     generate: false
@@ -77,16 +73,16 @@ flutter_launcher_icons:
 
 # ── Native Splash Screen ────────────────────────────────────────────────────
 flutter_native_splash:
-  color: "#2E7D32"
+  color: "#4A7C59"
   image: assets/icon/app_icon.png
-  color_dark: "#1B5E20"
+  color_dark: "#2D5A3D"
   image_dark: assets/icon/app_icon.png
   android: true
   ios: true
   fullscreen: false
   android_12:
-    color: "#2E7D32"
-    icon_background_color: "#1B5E20"
+    color: "#4A7C59"
+    icon_background_color: "#2D5A3D"
     image: assets/icon/app_icon.png
 
 flutter:

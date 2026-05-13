@@ -18,5 +18,9 @@ class CreateFarmParams {
 
 abstract class FarmRepository {
   Future<FarmEntity> createFarm(CreateFarmParams params);
+  Future<void> updateFarm(String farmId, CreateFarmParams params);
+  Future<void> deleteFarm(String farmId);
   Future<List<FarmEntity>> getFarms(String ownerId);
+  /// Returns the last cached farm list for [ownerId], or null if no cache exists.
+  Future<List<FarmEntity>?> getCachedFarms(String ownerId);
 }

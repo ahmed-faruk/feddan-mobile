@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
 import { fetchWeather, WeatherData } from "./nasaPower";
 import {
-  CropType, CROP_NAME_AR, getKc, isFertilizationDay,
+  CropType, CROP_NAME_AR, getKc, isFertilizationDay, STAGE_DAYS,
 } from "./cropConstants";
 import { sendDailyDigest } from "./notifications";
 
@@ -34,13 +34,27 @@ interface TaskDoc {
 const IRRIGATE_THRESHOLD_MM = 3.0;
 const RAIN_SKIP_THRESHOLD_MM = 3.0;
 
+// C2: Deterministic doc-ID key — same farm + date + crop + type always maps
+// to the same Firestore path, so a double-fired scheduler writes nothing new.
+function toDateKey(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+}
+
 export async function runDailyTaskEngine(
   db: admin.firestore.Firestore,
 ): Promise<void> {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Compute today's date in Cairo local time so the scheduledDate boundary
+  // matches the farmer's calendar regardless of UTC offset (UTC+2/+3 DST).
+  const cairoMidnight = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Africa/Cairo" }),
+  );
+  cairoMidnight.setHours(0, 0, 0, 0);
+  const today = cairoMidnight;
   const scheduledTs = admin.firestore.Timestamp.fromDate(today);
   const now = admin.firestore.Timestamp.now();
+  // C2: pre-compute once; used to build deterministic document IDs.
+  const dateKey = toDateKey(today);
 
   const farmsSnap = await db.collection("farms").get();
   if (farmsSnap.empty) {
@@ -51,14 +65,39 @@ export async function runDailyTaskEngine(
   let totalTasks = 0;
 
   for (const farmDoc of farmsSnap.docs) {
+  try {
     const farm = farmDoc.data() as FarmDoc;
     if (!farm.latitude || !farm.longitude || !farm.cropTypes?.length) continue;
+
+    // C2: Idempotency guard — if the scheduler fires twice today, the first run
+    // already wrote tasks; skip the farm to avoid overwriting user-set statuses.
+    const existingToday = await db
+      .collection("farms").doc(farmDoc.id)
+      .collection("tasks")
+      .where("scheduledDate", "==", scheduledTs)
+      .limit(1)
+      .get();
+    if (!existingToday.empty) {
+      console.log(`[TaskEngine] Farm ${farmDoc.id} already has tasks for today — skipping (idempotency guard).`);
+      continue;
+    }
 
     let weather: WeatherData;
     try {
       weather = await fetchWeather(farm.latitude, farm.longitude, today);
     } catch (err) {
       console.error(`[${farmDoc.id}] Weather fetch failed:`, err);
+      continue;
+    }
+
+    // M5: If NASA POWER returned -999 for all parameters, safeAvg() gives 0
+    // across the board. ET0=0, maxTemp=0, humidity=0 cannot occur on a real
+    // day in Egypt — treat this as a bad-data signal and skip task generation.
+    if (weather.et0 === 0 && weather.maxTempC === 0 && weather.humidityPct === 0) {
+      console.warn(
+        `[TaskEngine] Farm ${farmDoc.id}: all weather values are zero — ` +
+        `NASA POWER likely returned -999 fill-values. Skipping task generation to avoid bad data.`,
+      );
       continue;
     }
 
@@ -73,6 +112,18 @@ export async function runDailyTaskEngine(
     const farmTasks: TaskDoc[] = [];
 
     for (const cropType of farm.cropTypes) {
+      // M6: Skip crops whose full growth cycle has already ended, or whose
+      // planting date is in the future (user data entry error). Past-cycle
+      // farms would keep generating IRRIGATE tasks indefinitely at late-stage Kc.
+      const totalCycleDays = STAGE_DAYS[cropType].reduce((s, d) => s + d, 0);
+      if (daysSincePlanting < 0 || daysSincePlanting > totalCycleDays) {
+        console.log(
+          `[TaskEngine] Farm ${farmDoc.id}, ${cropType}: ` +
+          `daysSincePlanting=${daysSincePlanting} is outside [0, ${totalCycleDays}] — skipping crop.`,
+        );
+        continue;
+      }
+
       const kc = getKc(cropType, daysSincePlanting);
       const etc = weather.et0 * kc;
       const cropAr = CROP_NAME_AR[cropType];
@@ -137,12 +188,35 @@ export async function runDailyTaskEngine(
       }
     }
 
+    // Persist today's weather snapshot onto the farm document so the Flutter
+    // app can display it without a separate Firestore read.
+    try {
+      await db.collection("farms").doc(farmDoc.id).update({
+        latestWeather: {
+          date: scheduledTs,
+          et0: weather.et0,
+          rainfall: weather.rainfall,
+          maxTempC: weather.maxTempC,
+          minTempC: weather.minTempC,
+          humidityPct: weather.humidityPct,
+        },
+      });
+    } catch (err) {
+      console.error(`[Weather] Failed to update farm ${farmDoc.id}:`, err);
+    }
+
     // Write tasks in a batch
+    // C2: deterministic doc ID = farmId_YYYYMMDD_cropType_taskType.
+    // (IRRIGATE/IRRIGATE_SKIP/FERTILIZE/INSPECT are mutually exclusive per
+    // crop per day, so this combination is always unique within a farm.)
+    // The existence guard above is the primary idempotency mechanism; the
+    // deterministic ID is the belt-and-suspenders fallback.
     if (farmTasks.length > 0) {
       const batch = db.batch();
       for (const task of farmTasks) {
+        const docId = `${farmDoc.id}_${dateKey}_${task.cropType}_${task.type}`;
         const ref = db.collection("farms").doc(farmDoc.id)
-          .collection("tasks").doc();
+          .collection("tasks").doc(docId);
         batch.set(ref, task);
       }
       await batch.commit();
@@ -164,6 +238,8 @@ export async function runDailyTaskEngine(
         }
       }
     }
+  } catch (err) {
+    console.error(`[TaskEngine] Farm ${farmDoc.id} failed — skipping:`, err);
   }
 
   console.log(

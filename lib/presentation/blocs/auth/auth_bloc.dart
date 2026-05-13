@@ -23,6 +23,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthOtpSubmitted>(_onOtpSubmitted);
     on<AuthResendRequested>(_onResendRequested);
     on<AuthBackToPhone>(_onBackToPhone);
+    on<AuthGoogleSignInRequested>(_onGoogleSignIn);
     on<AuthSignOutRequested>(_onSignOutRequested);
   }
 
@@ -74,6 +75,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  Future<void> _onGoogleSignIn(
+    AuthGoogleSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+    try {
+      await _repository.signInWithGoogle();
+      emit(state.copyWith(status: AuthStatus.authenticated));
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'sign-in-canceled') {
+        emit(state.copyWith(status: AuthStatus.initial));
+      } else {
+        emit(state.copyWith(
+          status: AuthStatus.failure,
+          errorMessage: _mapError(e),
+        ));
+      }
+    }
+  }
+
   Future<void> _onResendRequested(
     AuthResendRequested event,
     Emitter<AuthState> emit,
@@ -106,6 +127,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return 'انتهت صلاحية الرمز — أعد الإرسال';
       case 'quota-exceeded':
         return 'تجاوزت الحصة المسموحة — حاول لاحقاً';
+      case 'account-exists-with-different-credential':
+        return 'هذا البريد مرتبط بطريقة دخول أخرى';
       default:
         return e.message ?? 'حدث خطأ، يرجى المحاولة مرة أخرى';
     }

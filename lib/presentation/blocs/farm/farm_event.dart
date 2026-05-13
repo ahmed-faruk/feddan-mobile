@@ -19,6 +19,15 @@ final class FarmLocationRequested extends FarmEvent {
   const FarmLocationRequested();
 }
 
+final class FarmLocationPinChanged extends FarmEvent {
+  final double latitude;
+  final double longitude;
+  const FarmLocationPinChanged(this.latitude, this.longitude);
+
+  @override
+  List<Object?> get props => [latitude, longitude];
+}
+
 final class FarmCropToggled extends FarmEvent {
   final String cropType;
   const FarmCropToggled(this.cropType);
@@ -37,4 +46,8 @@ final class FarmPlantingDateChanged extends FarmEvent {
 
 final class FarmSaveRequested extends FarmEvent {
   const FarmSaveRequested();
+}
+
+final class FarmDeleteRequested extends FarmEvent {
+  const FarmDeleteRequested();
 }

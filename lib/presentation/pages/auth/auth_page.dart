@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/language/language_bloc.dart';
 
@@ -18,7 +19,6 @@ class AuthPage extends StatelessWidget {
       listenWhen: (p, c) => p.status != c.status,
       listener: (context, state) {
         if (state.status == AuthStatus.authenticated) {
-          // Request FCM permission and save token after the user signs in.
           NotificationService.requestPermission();
           context.go('/home');
         } else if (state.status == AuthStatus.failure &&
@@ -32,8 +32,6 @@ class AuthPage extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        final isArabic =
-            context.watch<LanguageBloc>().state.locale.languageCode == 'ar';
         return Scaffold(
           backgroundColor: AppColors.background,
           body: SafeArea(
@@ -47,16 +45,8 @@ class AuthPage extends StatelessWidget {
                 child: child,
               ),
               child: state.isOtpPhase
-                  ? _OtpSection(
-                      key: const ValueKey('otp'),
-                      state: state,
-                      isArabic: isArabic,
-                    )
-                  : _PhoneSection(
-                      key: const ValueKey('phone'),
-                      state: state,
-                      isArabic: isArabic,
-                    ),
+                  ? _OtpSection(key: const ValueKey('otp'), state: state)
+                  : _PhoneSection(key: const ValueKey('phone'), state: state),
             ),
           ),
         );
@@ -69,13 +59,7 @@ class AuthPage extends StatelessWidget {
 
 class _PhoneSection extends StatefulWidget {
   final AuthState state;
-  final bool isArabic;
-
-  const _PhoneSection({
-    super.key,
-    required this.state,
-    required this.isArabic,
-  });
+  const _PhoneSection({super.key, required this.state});
 
   @override
   State<_PhoneSection> createState() => _PhoneSectionState();
@@ -101,8 +85,10 @@ class _PhoneSectionState extends State<_PhoneSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isSending = widget.state.isSendingOtp;
-    final isArabic = widget.isArabic;
+    final isArabic =
+        context.watch<LanguageBloc>().state.locale.languageCode == 'ar';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -110,11 +96,10 @@ class _PhoneSectionState extends State<_PhoneSection> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 32),
-          // Logo
-          const Center(
+          Center(
             child: Text(
-              'فدان',
-              style: TextStyle(
+              l10n.appName,
+              style: const TextStyle(
                 fontSize: 52,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
@@ -124,9 +109,7 @@ class _PhoneSectionState extends State<_PhoneSection> {
           const SizedBox(height: 8),
           Center(
             child: Text(
-              isArabic
-                  ? 'مساعدك الزراعي الذكي'
-                  : 'Your Smart Farm Assistant',
+              l10n.tagline,
               style: const TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 15,
@@ -135,7 +118,7 @@ class _PhoneSectionState extends State<_PhoneSection> {
           ),
           const SizedBox(height: 56),
           Text(
-            isArabic ? 'سجل دخولك' : 'Sign In',
+            l10n.signIn,
             style: Theme.of(context)
                 .textTheme
                 .headlineSmall
@@ -143,26 +126,22 @@ class _PhoneSectionState extends State<_PhoneSection> {
           ),
           const SizedBox(height: 8),
           Text(
-            isArabic
-                ? 'أدخل رقم هاتفك لتلقي رمز التحقق'
-                : 'Enter your phone number to receive a verification code',
+            l10n.phoneSubtitle,
             style: const TextStyle(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 32),
-          // Phone number input row
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Country code
               SizedBox(
                 width: 72,
                 child: TextFormField(
                   controller: _countryCodeCtrl,
                   keyboardType: TextInputType.phone,
                   textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
-                    labelText: 'كود',
-                    contentPadding: EdgeInsets.symmetric(
+                  decoration: InputDecoration(
+                    labelText: l10n.countryCode,
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 16,
                     ),
@@ -170,15 +149,14 @@ class _PhoneSectionState extends State<_PhoneSection> {
                 ),
               ),
               const SizedBox(width: 12),
-              // Phone number
               Expanded(
                 child: TextFormField(
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
                   textAlign: TextAlign.start,
                   decoration: InputDecoration(
-                    labelText: isArabic ? 'رقم الهاتف' : 'Phone number',
-                    hintText: isArabic ? '01X XXXX XXXX' : '01X XXXX XXXX',
+                    labelText: l10n.phoneLabel,
+                    hintText: '01X XXXX XXXX',
                   ),
                   onFieldSubmitted: (_) => _submit(),
                 ),
@@ -193,24 +171,59 @@ class _PhoneSectionState extends State<_PhoneSection> {
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
+                        color: Colors.white, strokeWidth: 2),
                   )
-                : Text(
-                    isArabic ? 'إرسال رمز التحقق' : 'Send verification code',
-                  ),
+                : Text(l10n.sendCode),
           ),
           const SizedBox(height: 16),
           Text(
-            isArabic
-                ? 'سنرسل لك رمزاً مكوناً من 6 أرقام عبر رسالة نصية'
-                : 'We\'ll send you a 6-digit code via SMS',
+            l10n.smsHint,
             style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 13,
-            ),
+                color: AppColors.textSecondary, fontSize: 13),
             textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          // ── OR divider ───────────────────────────────────────────────
+          Row(
+            children: [
+              const Expanded(child: Divider()),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  l10n.orDivider,
+                  style: const TextStyle(color: AppColors.textSecondary),
+                ),
+              ),
+              const Expanded(child: Divider()),
+            ],
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: isSending
+                ? null
+                : () => context
+                    .read<AuthBloc>()
+                    .add(const AuthGoogleSignInRequested()),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 52),
+            ),
+            icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+            label: Text(l10n.signInWithGoogle),
+          ),
+          const SizedBox(height: 16),
+          // Language toggle
+          Center(
+            child: TextButton(
+              onPressed: () => context.read<LanguageBloc>().add(
+                    LanguageChanged(
+                      isArabic ? const Locale('en') : const Locale('ar'),
+                    ),
+                  ),
+              child: Text(
+                isArabic ? 'English' : 'العربية',
+                style: const TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
           ),
         ],
       ),
@@ -222,13 +235,7 @@ class _PhoneSectionState extends State<_PhoneSection> {
 
 class _OtpSection extends StatefulWidget {
   final AuthState state;
-  final bool isArabic;
-
-  const _OtpSection({
-    super.key,
-    required this.state,
-    required this.isArabic,
-  });
+  const _OtpSection({super.key, required this.state});
 
   @override
   State<_OtpSection> createState() => _OtpSectionState();
@@ -261,7 +268,6 @@ class _OtpSectionState extends State<_OtpSection> {
 
   void _onDigitChanged(int index, String value) {
     if (value.length > 1) {
-      // Handle paste of full OTP
       final digits = value.replaceAll(RegExp(r'\D'), '');
       for (var i = 0; i < 6 && i < digits.length; i++) {
         _controllers[i].text = digits[i];
@@ -283,34 +289,35 @@ class _OtpSectionState extends State<_OtpSection> {
   }
 
   void _submit() {
-    if (_otp.length == 6) {
+    if (_otp.length == 6 && !widget.state.isVerifyingOtp) {
       context.read<AuthBloc>().add(AuthOtpSubmitted(_otp));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isVerifying = widget.state.isVerifyingOtp;
-    final isArabic = widget.isArabic;
+    // LanguageBloc is watched so the widget rebuilds on locale change.
+    context.watch<LanguageBloc>();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Back button
           Align(
             alignment: AlignmentDirectional.centerStart,
             child: TextButton.icon(
               onPressed: () =>
                   context.read<AuthBloc>().add(const AuthBackToPhone()),
               icon: const Icon(Icons.arrow_back),
-              label: Text(isArabic ? 'رجوع' : 'Back'),
+              label: Text(l10n.back),
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            isArabic ? 'أدخل رمز التحقق' : 'Enter verification code',
+            l10n.enterCode,
             style: Theme.of(context)
                 .textTheme
                 .headlineSmall
@@ -318,13 +325,10 @@ class _OtpSectionState extends State<_OtpSection> {
           ),
           const SizedBox(height: 8),
           Text(
-            isArabic
-                ? 'أُرسل الرمز إلى ${widget.state.phone}'
-                : 'Code sent to ${widget.state.phone}',
+            l10n.codeSentTo(widget.state.phone),
             style: const TextStyle(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 40),
-          // 6-box OTP input
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(6, (i) {
@@ -346,21 +350,19 @@ class _OtpSectionState extends State<_OtpSection> {
                     textAlign: TextAlign.center,
                     maxLength: 1,
                     style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        fontSize: 22, fontWeight: FontWeight.bold),
                     decoration: InputDecoration(
                       counterText: '',
                       contentPadding: EdgeInsets.zero,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.textSecondary),
+                        borderSide: const BorderSide(
+                            color: AppColors.textSecondary),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.primary, width: 2),
+                        borderSide: const BorderSide(
+                            color: AppColors.primary, width: 2),
                       ),
                     ),
                     onChanged: (v) => _onDigitChanged(i, v),
@@ -377,16 +379,13 @@ class _OtpSectionState extends State<_OtpSection> {
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
+                        color: Colors.white, strokeWidth: 2),
                   )
-                : Text(isArabic ? 'تحقق' : 'Verify'),
+                : Text(l10n.verify),
           ),
           const SizedBox(height: 24),
           Center(
             child: _ResendTimer(
-              isArabic: isArabic,
               onResend: () =>
                   context.read<AuthBloc>().add(const AuthResendRequested()),
             ),
@@ -400,10 +399,8 @@ class _OtpSectionState extends State<_OtpSection> {
 // ─── Resend Timer ─────────────────────────────────────────────────────────────
 
 class _ResendTimer extends StatefulWidget {
-  final bool isArabic;
   final VoidCallback onResend;
-
-  const _ResendTimer({required this.isArabic, required this.onResend});
+  const _ResendTimer({required this.onResend});
 
   @override
   State<_ResendTimer> createState() => _ResendTimerState();
@@ -437,18 +434,17 @@ class _ResendTimerState extends State<_ResendTimer> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_seconds > 0) {
       return Text(
-        widget.isArabic
-            ? 'إعادة الإرسال خلال $_seconds ث'
-            : 'Resend in ${_seconds}s',
+        l10n.resendIn(_seconds),
         style: const TextStyle(color: AppColors.textSecondary),
       );
     }
     return TextButton(
       onPressed: widget.onResend,
       child: Text(
-        widget.isArabic ? 'إعادة إرسال الرمز' : 'Resend code',
+        l10n.resendCode,
         style: const TextStyle(color: AppColors.primary),
       ),
     );

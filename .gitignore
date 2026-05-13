@@ -56,6 +56,8 @@ firebase_app_id_file.json
 .env
 .env.*
 secrets/
+# iOS API key xcconfig — copy SecretKeys.xcconfig.example to set up locally
+**/ios/Flutter/SecretKeys.xcconfig
 
 # IDE
 .idea/

@@ -1,2 +1,4 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
 #include "Generated.xcconfig"
+// H1: Local API keys (gitignored). Copy SecretKeys.xcconfig.example → SecretKeys.xcconfig.
+#include? "SecretKeys.xcconfig"

@@ -19,3 +19,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+
+  Three remaining user actions (require credentials/console access):
+  1. Replace YOUR_GOOGLE_MAPS_API_KEY in AndroidManifest.xml and AppDelegate.swift
+  2. Replace YOUR_REVERSED_CLIENT_ID in ios/Runner/Info.plist with value from GoogleService-Info.plist
+  3. Add SHA fingerprints to Firebase Console for Android Google Sign-In, then run firebase functions:secrets:set OWM_API_KEY
+
+
+To activate the Maps widget, replace the two placeholder values in android/local.properties and ios/Flutter/SecretKeys.xcconfig with your real key from Google Cloud Console. That is the only action needed — no source files need to be touched.            

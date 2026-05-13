@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'weather_snapshot.dart';
+
 class FarmEntity extends Equatable {
   final String? id;
   final String name;
@@ -9,6 +11,8 @@ class FarmEntity extends Equatable {
   final DateTime plantingDate;
   final String ownerId;
   final DateTime createdAt;
+  // Written daily by the Cloud Function; null until first engine run.
+  final WeatherSnapshot? latestWeather;
 
   const FarmEntity({
     this.id,
@@ -19,9 +23,12 @@ class FarmEntity extends Equatable {
     required this.plantingDate,
     required this.ownerId,
     required this.createdAt,
+    this.latestWeather,
   });
 
   @override
-  List<Object?> get props =>
-      [id, name, latitude, longitude, cropTypes, plantingDate, ownerId, createdAt];
+  List<Object?> get props => [
+        id, name, latitude, longitude, cropTypes,
+        plantingDate, ownerId, createdAt, latestWeather,
+      ];
 }

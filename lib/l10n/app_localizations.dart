@@ -104,11 +104,107 @@ abstract class AppLocalizations {
   /// **'فدان'**
   String get appName;
 
+  /// App tagline shown on auth screen
+  ///
+  /// In ar, this message translates to:
+  /// **'مساعدك الزراعي الذكي'**
+  String get tagline;
+
   /// Loading text on splash screen
   ///
   /// In ar, this message translates to:
   /// **'جارٍ التحميل...'**
   String get splashLoading;
+
+  /// Sign in heading
+  ///
+  /// In ar, this message translates to:
+  /// **'سجل دخولك'**
+  String get signIn;
+
+  /// Phone input subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل رقم هاتفك لتلقي رمز التحقق'**
+  String get phoneSubtitle;
+
+  /// Country code field label
+  ///
+  /// In ar, this message translates to:
+  /// **'كود'**
+  String get countryCode;
+
+  /// Phone number field label
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم الهاتف'**
+  String get phoneLabel;
+
+  /// Send OTP button
+  ///
+  /// In ar, this message translates to:
+  /// **'إرسال رمز التحقق'**
+  String get sendCode;
+
+  /// SMS hint below send button
+  ///
+  /// In ar, this message translates to:
+  /// **'سنرسل لك رمزاً مكوناً من 6 أرقام عبر رسالة نصية'**
+  String get smsHint;
+
+  /// Back button label
+  ///
+  /// In ar, this message translates to:
+  /// **'رجوع'**
+  String get back;
+
+  /// OTP heading
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل رمز التحقق'**
+  String get enterCode;
+
+  /// OTP sent confirmation
+  ///
+  /// In ar, this message translates to:
+  /// **'أُرسل الرمز إلى {phone}'**
+  String codeSentTo(String phone);
+
+  /// Verify OTP button
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق'**
+  String get verify;
+
+  /// Resend countdown
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة الإرسال خلال {seconds} ث'**
+  String resendIn(int seconds);
+
+  /// Resend code button
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة إرسال الرمز'**
+  String get resendCode;
+
+  /// Divider between auth options
+  ///
+  /// In ar, this message translates to:
+  /// **'أو'**
+  String get orDivider;
+
+  /// Google Sign-In button
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيل الدخول عبر جوجل'**
+  String get signInWithGoogle;
+
+  /// Sign out button
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيل الخروج'**
+  String get signOut;
 
   /// Home page title
   ///
@@ -122,7 +218,13 @@ abstract class AppLocalizations {
   /// **'مرحباً بك في فدان'**
   String get welcome;
 
-  /// Empty state prompt on home screen
+  /// Welcome body text in empty state
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف مزرعتك الأولى لتبدأ في استقبال\nمهام الري والتسميد اليومية'**
+  String get welcomeBody;
+
+  /// Empty state prompt
   ///
   /// In ar, this message translates to:
   /// **'أضف مزرعتك الأولى للبدء'**
@@ -134,17 +236,149 @@ abstract class AppLocalizations {
   /// **'مزارعي'**
   String get myFarms;
 
+  /// Farm count label
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{{count} مزرعة} other{{count} مزارع}}'**
+  String farmCount(int count);
+
   /// Add farm button
   ///
   /// In ar, this message translates to:
   /// **'إضافة مزرعة'**
   String get addFarm;
 
-  /// Farm profile page title
+  /// Short add label for chip
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة'**
+  String get add;
+
+  /// Today's tasks section
+  ///
+  /// In ar, this message translates to:
+  /// **'مهام اليوم'**
+  String get todayTasks;
+
+  /// Empty tasks message
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد مهام اليوم'**
+  String get noTasksToday;
+
+  /// Hint below empty tasks
+  ///
+  /// In ar, this message translates to:
+  /// **'ستصلك المهام يومياً عند الساعة 6 صباحاً'**
+  String get tasksArriveDaily;
+
+  /// Task load error message
+  ///
+  /// In ar, this message translates to:
+  /// **'فشل تحميل المهام — اسحب للأسفل لإعادة المحاولة'**
+  String get tasksLoadError;
+
+  /// Banner shown when farm list is served from Hive cache
+  ///
+  /// In ar, this message translates to:
+  /// **'أنت غير متصل — تعرض بيانات محفوظة مسبقاً'**
+  String get offlineBanner;
+
+  /// Task action error message
+  ///
+  /// In ar, this message translates to:
+  /// **'فشل تحديث المهمة — تحقق من الاتصال'**
+  String get taskUpdateError;
+
+  /// High priority badge
+  ///
+  /// In ar, this message translates to:
+  /// **'عاجل'**
+  String get priorityHigh;
+
+  /// Normal priority badge
+  ///
+  /// In ar, this message translates to:
+  /// **'اليوم'**
+  String get priorityNormal;
+
+  /// Low priority badge
+  ///
+  /// In ar, this message translates to:
+  /// **'اختياري'**
+  String get priorityLow;
+
+  /// Mark task done tooltip
+  ///
+  /// In ar, this message translates to:
+  /// **'تم'**
+  String get taskDone;
+
+  /// Skip task tooltip
+  ///
+  /// In ar, this message translates to:
+  /// **'تخطي'**
+  String get taskSkip;
+
+  /// Water demand label with unit
+  ///
+  /// In ar, this message translates to:
+  /// **'{mm} مم'**
+  String waterDemand(String mm);
+
+  /// Farm profile create title
   ///
   /// In ar, this message translates to:
   /// **'إضافة مزرعة'**
   String get farmProfileTitle;
+
+  /// Farm profile edit title
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل المزرعة'**
+  String get editFarm;
+
+  /// Delete farm icon tooltip
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف المزرعة'**
+  String get deleteFarmTooltip;
+
+  /// Delete farm dialog title
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف المزرعة؟'**
+  String get deleteFarmTitle;
+
+  /// Delete farm dialog body
+  ///
+  /// In ar, this message translates to:
+  /// **'سيتم حذف هذه المزرعة نهائياً ولا يمكن التراجع عن ذلك.'**
+  String get deleteFarmWarning;
+
+  /// Delete confirm button
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف'**
+  String get delete;
+
+  /// Farm saved success message
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حفظ المزرعة بنجاح'**
+  String get farmSavedSuccess;
+
+  /// Farm updated success message
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تحديث المزرعة بنجاح'**
+  String get farmUpdatedSuccess;
+
+  /// Farm deleted success message
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حذف المزرعة'**
+  String get farmDeletedSuccess;
 
   /// Farm name field label
   ///
@@ -182,6 +416,12 @@ abstract class AppLocalizations {
   /// **'الموقع المحدد'**
   String get locationSet;
 
+  /// Hint to tap map for fine adjustment
+  ///
+  /// In ar, this message translates to:
+  /// **'اضغط على الخريطة لضبط الموقع'**
+  String get tapMapToAdjust;
+
   /// Update location button
   ///
   /// In ar, this message translates to:
@@ -200,17 +440,35 @@ abstract class AppLocalizations {
   /// **'اختر محاصيل مزرعتك'**
   String get cropsSubtitle;
 
+  /// Planting date section title
+  ///
+  /// In ar, this message translates to:
+  /// **'تاريخ الزراعة'**
+  String get plantingDate;
+
+  /// Planting date subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'متى زرعت هذا الموسم؟'**
+  String get plantingDateSubtitle;
+
+  /// Date picker placeholder
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر التاريخ'**
+  String get selectDate;
+
   /// Save farm button
   ///
   /// In ar, this message translates to:
   /// **'حفظ المزرعة'**
   String get saveFarm;
 
-  /// Farm saved success message
+  /// Update farm button
   ///
   /// In ar, this message translates to:
-  /// **'تم حفظ المزرعة بنجاح'**
-  String get farmSavedSuccess;
+  /// **'تحديث المزرعة'**
+  String get updateFarm;
 
   /// Location permission denied error
   ///
@@ -218,17 +476,53 @@ abstract class AppLocalizations {
   /// **'تم رفض إذن الموقع — يرجى السماح من الإعدادات'**
   String get locationPermissionDenied;
 
-  /// Today's tasks section
+  /// Weather section title
   ///
   /// In ar, this message translates to:
-  /// **'مهام اليوم'**
-  String get todayTasks;
+  /// **'الطقس اليوم'**
+  String get weatherToday;
 
-  /// Empty tasks message
+  /// ET0 label
   ///
   /// In ar, this message translates to:
-  /// **'لا توجد مهام اليوم'**
-  String get noTasksToday;
+  /// **'الاحتياج المائي'**
+  String get et0Label;
+
+  /// Rainfall label
+  ///
+  /// In ar, this message translates to:
+  /// **'هطول'**
+  String get rainfallLabel;
+
+  /// No description provided for @temperature.
+  ///
+  /// In ar, this message translates to:
+  /// **'درجة الحرارة'**
+  String get temperature;
+
+  /// No description provided for @maxTemp.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحرارة القصوى'**
+  String get maxTemp;
+
+  /// No description provided for @humidity.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرطوبة'**
+  String get humidity;
+
+  /// No description provided for @windSpeed.
+  ///
+  /// In ar, this message translates to:
+  /// **'سرعة الرياح'**
+  String get windSpeed;
+
+  /// No description provided for @rainExpected.
+  ///
+  /// In ar, this message translates to:
+  /// **'متوقع هطول أمطار'**
+  String get rainExpected;
 
   /// Irrigation task type
   ///
@@ -242,11 +536,11 @@ abstract class AppLocalizations {
   /// **'تسميد'**
   String get fertilize;
 
-  /// Spraying task type
+  /// Inspection task type
   ///
   /// In ar, this message translates to:
-  /// **'رش'**
-  String get spray;
+  /// **'تفتيش'**
+  String get inspect;
 
   /// No description provided for @cropTomato.
   ///
@@ -308,55 +602,25 @@ abstract class AppLocalizations {
   /// **'قرع'**
   String get cropZucchini;
 
-  /// No description provided for @weatherToday.
-  ///
-  /// In ar, this message translates to:
-  /// **'الطقس اليوم'**
-  String get weatherToday;
-
-  /// No description provided for @temperature.
-  ///
-  /// In ar, this message translates to:
-  /// **'درجة الحرارة'**
-  String get temperature;
-
-  /// No description provided for @humidity.
-  ///
-  /// In ar, this message translates to:
-  /// **'الرطوبة'**
-  String get humidity;
-
-  /// No description provided for @windSpeed.
-  ///
-  /// In ar, this message translates to:
-  /// **'سرعة الرياح'**
-  String get windSpeed;
-
-  /// No description provided for @rainExpected.
-  ///
-  /// In ar, this message translates to:
-  /// **'متوقع هطول أمطار'**
-  String get rainExpected;
-
-  /// No description provided for @settings.
+  /// Settings page title
   ///
   /// In ar, this message translates to:
   /// **'الإعدادات'**
   String get settings;
 
-  /// No description provided for @language.
+  /// Language setting label
   ///
   /// In ar, this message translates to:
   /// **'اللغة'**
   String get language;
 
-  /// No description provided for @arabic.
+  /// Arabic language option
   ///
   /// In ar, this message translates to:
   /// **'العربية'**
   String get arabic;
 
-  /// No description provided for @english.
+  /// English language option
   ///
   /// In ar, this message translates to:
   /// **'الإنجليزية'**

@@ -8,11 +8,14 @@ class FarmListState extends Equatable {
   final FarmListStatus status;
   final List<FarmEntity> farms;
   final String? errorMessage;
+  // true when farms were served from Hive because Firestore was unreachable.
+  final bool fromCache;
 
   const FarmListState({
     this.status = FarmListStatus.initial,
     this.farms = const [],
     this.errorMessage,
+    this.fromCache = false,
   });
 
   bool get hasFarms => farms.isNotEmpty;
@@ -25,13 +28,15 @@ class FarmListState extends Equatable {
     FarmListStatus? status,
     List<FarmEntity>? farms,
     String? errorMessage,
+    bool? fromCache,
   }) =>
       FarmListState(
         status: status ?? this.status,
         farms: farms ?? this.farms,
         errorMessage: errorMessage ?? this.errorMessage,
+        fromCache: fromCache ?? this.fromCache,
       );
 
   @override
-  List<Object?> get props => [status, farms, errorMessage];
+  List<Object?> get props => [status, farms, errorMessage, fromCache];
 }
